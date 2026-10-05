@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玉の数だけ愛される？パチペット生活</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header class="header">
+            <div class="title-logo">🐶 玉の数だけ愛される？<br>パチペット生活</div>
+        </header>
+
+        <!-- 育成ルーム -->
+        <section class="room-section">
+            <div class="section-label">育成ルーム</div>
+            <div class="pet-name">たまごろう</div>
+            <div class="pet-area">
+                <!-- ペットの画像や家具が入る場所 -->
+                <div class="pet-character">(・∀・)</div>
+            </div>
+            <div class="stats-panel">
+                <p>おなか：85%</p>
+                <p>ごきげん：92%</p>
+                <p>LV: 15 <span class="exp-bar"><span class="exp-fill"></span></span></p>
+            </div>
+        </section>
+
+        <!-- パチンコ画面 -->
+        <section class="pachinko-section">
+            <div class="section-label">パチンコ画面</div>
+            <div class="machine-area">
+                <div class="jackpot-screen">
+                    <h2 class="jackpot-numbers">7 7 7</h2>
+                    <p class="jackpot-text">大当たり！</p>
+                    <p class="jackpot-details">獲得玉数：12,800発<br>継続中！</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 操作パネル -->
+        <section class="control-section">
+            <div class="status-bar">
+                <div class="ball-count">玉数 <span>54,320発</span></div>
+                <div class="toggles">
+                    <label>玉を投入 <input type="checkbox"></label>
+                    <label>オート <input type="checkbox" checked></label>
+                </div>
+            </div>
+            <button class="start-button" onclick="startGame()">スタート！</button>
+        </section>
+
+        <!-- 育成コマンド -->
+        <section class="command-section">
+            <div class="section-label-small">育成コマンド</div>
+            <div class="command-buttons">
+                <button class="cmd-btn food">ごはん</button>
+                <button class="cmd-btn play">あそぶ</button>
+                <button class="cmd-btn dress">おきがえ</button>
+            </div>
+        </section>
+		
+        <!-- フッターナビゲーション -->
+        <footer class="footer-nav">
+            <div class="nav-item">🏠<br>ホーム</div>
+            <div class="nav-item">🏪<br>SHOP</div>
+            <div class="nav-item">💎<br>玉購入</div>
+            <div class="nav-item">📋<br>ミッション</div>
+            <div class="nav-item">👑<br>ランキング</div>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
