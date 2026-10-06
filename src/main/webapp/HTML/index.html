@@ -52,15 +52,41 @@
             <button class="start-button" onclick="startGame()">スタート！</button>
         </section>
 
-        <!-- 育成コマンド -->
-        <section class="command-section">
-            <div class="section-label-small">育成コマンド</div>
-            <div class="command-buttons">
-                <button class="cmd-btn food">ごはん</button>
-                <button class="cmd-btn play">あそぶ</button>
-                <button class="cmd-btn dress">おきがえ</button>
-            </div>
-        </section>
+		<!-- 育成コマンド -->
+		        <section class="command-section">
+		            <div class="section-label-small">育成コマンド</div>
+		            <div class="command-buttons">
+		                <!-- onclick="openFoodModal()" を追加 -->
+		                <button class="cmd-btn food" onclick="openFoodModal()">ごはん</button>
+		                <button class="cmd-btn play">あそぶ</button>
+		                <button class="cmd-btn dress">おきがえ</button>
+		            </div>
+		        </section>
+
+		        <!-- ★ごはん選択ポップアップ★ -->
+		        <!-- style="display: none;" で最初から絶対に画面に出ないようにします -->
+		        <div id="food-modal" class="modal-overlay" style="display: none;">
+		            <div class="modal-content">
+		                <div class="modal-header">
+		                    <span>🍚 ごはんをあげる</span>
+		                    <button class="modal-close-btn" onclick="closeFoodModal()">×</button>
+		                </div>
+		                <div class="food-list">
+		                    <button class="food-item-btn" onclick="feedPet('しめじ', 10)">
+		                        <span class="food-name">🍄 しめじ</span>
+		                        <span class="food-cost">10発</span>
+		                    </button>
+		                    <button class="food-item-btn" onclick="feedPet('プリン', 50)">
+		                        <span class="food-name">🍮 プリン</span>
+		                        <span class="food-cost">50発</span>
+		                    </button>
+		                    <button class="food-item-btn" onclick="feedPet('大盛ご飯', 100)">
+		                        <span class="food-name">🍚 大盛ご飯</span>
+		                        <span class="food-cost">100発</span>
+		                    </button>
+		                </div>
+		            </div>
+		        </div>
 		
         <!-- フッターナビゲーション -->
         <footer class="footer-nav">
