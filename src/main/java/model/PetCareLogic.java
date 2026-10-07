@@ -1,71 +1,125 @@
 package model;
 
+import java.math.BigInteger;
+
 public class PetCareLogic {
 
     public static final int MAX_LEVEL = 100;
-    public static final int EXP_PER_LEVEL = 10;
-    public static final int MAX_STATUS = 100;
-    public static final int MIN_STATUS = 0;
 
-    // ごはんコマンド
-    public void feed(Pet pet) {
-        int nextHunger = Math.min(MAX_STATUS, pet.getHunger() + 15);
-        pet.setHunger(nextHunger);
-        addExp(pet, 10);
+    // ごはん10段階のデータ (名前, 必要玉数, 獲得EXP)
+    public record CareItem(String id, String name, BigInteger cost, BigInteger expGain) {}
+
+    public static final CareItem[] FOOD_ITEMS = {
+        new CareItem("food_1", "定番かりかりフード", BigInteger.ZERO, BigInteger.valueOf(2)),
+        new CareItem("food_2", "余り玉のヤクルト", BigInteger.valueOf(10), BigInteger.valueOf(8)),
+        new CareItem("food_3", "特製勝カレー", BigInteger.valueOf(50), BigInteger.valueOf(64)),
+        new CareItem("food_4", "特上A5霜降りパチ牛", BigInteger.valueOf(500), BigInteger.valueOf(1024)),
+        new CareItem("food_5", "純金箔コーティング軍艦", BigInteger.valueOf(5000), BigInteger.valueOf(16384)),
+        new CareItem("food_6", "パチプロ秘伝精力薬膳鍋", BigInteger.valueOf(100000), BigInteger.valueOf(1048576)),
+        new CareItem("food_7", "超高密度プラチナペレット", new BigInteger("100000000"), BigInteger.valueOf(1073741824)),
+        new CareItem("food_8", "暗黒物質の煮凝り", new BigInteger("100000000000"), new BigInteger("1099511627776")),
+        new CareItem("food_9", "ビッグバン凝縮スープ", new BigInteger("1000000000000000"), new BigInteger("1152921504606846976")),
+        new CareItem("food_10", "全知全能オメガパチゼリー", new BigInteger("1000000000000000000000000"), new BigInteger("100000000000000000000000000000"))
+    };
+
+    // あそぶ10段階のデータ
+    public static final CareItem[] PLAY_ITEMS = {
+        new CareItem("play_1", "じゃんけんあそび", BigInteger.ZERO, BigInteger.valueOf(3)),
+        new CareItem("play_2", "ピカピカ銀玉みがき", BigInteger.valueOf(15), BigInteger.valueOf(12)),
+        new CareItem("play_3", "ハンドル固定の練習", BigInteger.valueOf(80), BigInteger.valueOf(96)),
+        new CareItem("play_4", "パチンコ実機解体ショー", BigInteger.valueOf(800), BigInteger.valueOf(1536)),
+        new CareItem("play_5", "島設備ドル箱タワー積み", BigInteger.valueOf(8000), BigInteger.valueOf(24576)),
+        new CareItem("play_6", "全台一斉フィーバーフェス", BigInteger.valueOf(150000), BigInteger.valueOf(1572864)),
+        new CareItem("play_7", "重力子加速シミュ", new BigInteger("150000000"), BigInteger.valueOf(1610612736)),
+        new CareItem("play_8", "恒星系メガパチンコ大会", new BigInteger("150000000000"), new BigInteger("1649267441664")),
+        new CareItem("play_9", "因果律書き換えスロットル", new BigInteger("1500000000000000"), new BigInteger("1729382256910270464")),
+        new CareItem("play_10", "多元宇宙ビッグループ崩壊劇", new BigInteger("1500000000000000000000000"), new BigInteger("200000000000000000000000000000"))
+    };
+
+    // レベルに応じたパチンコ大当たり獲得玉数（インフレ計算）
+    public BigInteger calculateJackpotPayout(int level) {
+        // 基本出玉300発 + (level - 1) 乗の拡大係数 (約1.5倍ずつ増加)
+        BigInteger base = BigInteger.valueOf(300);
+        if (level <= 1) return base;
+        
+        // 3^((level-1)/2) 程度で適度にインフレ
+        BigInteger multiplier = BigInteger.valueOf(3).pow((level - 1) / 2 + 1);
+        return base.multiply(multiplier);
     }
 
-    // あそぶコマンド
-    public void play(Pet pet) {
-        int nextMood = Math.min(MAX_STATUS, pet.getMood() + 10);
-        int nextHunger = Math.max(MIN_STATUS, pet.getHunger() - 5);
-        pet.setMood(nextMood);
-        pet.setHunger(nextHunger);
-        addExp(pet, 15);
+    // ごはん実行（成功時 true）
+    public boolean feed(Pet pet, String itemId) {
+        for (CareItem item : FOOD_ITEMS) {
+            if (item.id().equals(itemId)) {
+                if (consumeBalls(pet, item.cost())) {
+                    addExp(pet, item.expGain());
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // あそぶ実行（成功時 true）
+    public boolean play(Pet pet, String itemId) {
+        for (CareItem item : PLAY_ITEMS) {
+            if (item.id().equals(itemId)) {
+                if (consumeBalls(pet, item.cost())) {
+                    addExp(pet, item.expGain());
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
     }
 
     // 経験値加算とレベルアップ計算
-    public void addExp(Pet pet, int gain) {
+    public void addExp(Pet pet, BigInteger gain) {
         if (pet.getLevel() >= MAX_LEVEL) {
             pet.setLevel(MAX_LEVEL);
-            pet.setExp(0);
+            pet.setExp(BigInteger.ZERO);
             return;
         }
 
-        int currentExp = pet.getExp() + gain;
+        BigInteger currentExp = pet.getExp().add(gain);
         int currentLevel = pet.getLevel();
 
-        while (currentExp >= EXP_PER_LEVEL && currentLevel < MAX_LEVEL) {
-            currentLevel++;
-            currentExp -= EXP_PER_LEVEL;
+        while (currentLevel < MAX_LEVEL) {
+            BigInteger neededExp = BigInteger.valueOf(2).pow(currentLevel);
+            if (currentExp.compareTo(neededExp) >= 0) {
+                currentExp = currentExp.subtract(neededExp);
+                currentLevel++;
+            } else {
+                break;
+            }
         }
 
         if (currentLevel >= MAX_LEVEL) {
             currentLevel = MAX_LEVEL;
-            currentExp = 0;
+            currentExp = BigInteger.ZERO;
         }
 
         pet.setLevel(currentLevel);
         pet.setExp(currentExp);
     }
 
-    // 玉の消費
-    public boolean consumeBalls(Pet pet, int amount) {
-        if (pet.getBalls() >= amount) {
-            pet.setBalls(pet.getBalls() - amount);
+    // 玉消費 (BigInteger対応)
+    public boolean consumeBalls(Pet pet, BigInteger amount) {
+        if (pet.getBalls().compareTo(amount) >= 0) {
+            pet.setBalls(pet.getBalls().subtract(amount));
             return true;
         }
         return false;
     }
 
-    // パチンコ当たり時（出玉加算＋ごきげんUP＋経験値5）
-    public void handlePachinkoHit(Pet pet, int amount) {
-        pet.setBalls(pet.getBalls() + amount);
-        pet.setMood(Math.min(MAX_STATUS, pet.getMood() + 5));
-        addExp(pet, 5); // 当たりで経験値5
+    public boolean consumeBalls(Pet pet, int amount) {
+        return consumeBalls(pet, BigInteger.valueOf(amount));
     }
 
-    // パチンコ外れ時（経験値1）
-    public void handlePachinkoMiss(Pet pet) {
-        addExp(pet, 1); // 外れで経験値1
+    // パチンコ当たり加算
+    public void handlePachinkoHit(Pet pet, BigInteger payout) {
+        pet.setBalls(pet.getBalls().add(payout));
     }
 }

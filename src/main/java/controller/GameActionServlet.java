@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Random;
 
 import jakarta.servlet.ServletException;
@@ -40,23 +41,17 @@ public class GameActionServlet extends HttpServlet {
             // パチンコ実行 (10発消費)
             if (petCareLogic.consumeBalls(pet, 10)) {
                 if (random.nextInt(5) == 0) {
-                    petCareLogic.handlePachinkoHit(pet, 300);
+                    BigInteger payout = petCareLogic.calculateJackpotPayout(pet.getLevel());
+                    petCareLogic.handlePachinkoHit(pet, payout);
                     jackpotResult = "7 7 7";
-                    message = "大当り！300発獲得！（EXP +5）";
+                    message = "大当り！" + payout + "発 獲得！";
                 } else {
-                    petCareLogic.handlePachinkoMiss(pet);
                     jackpotResult = "3 4 8";
-                    message = "ハズレ… 10発消費（EXP +1）";
+                    message = "ハズレ… 10発消費";
                 }
             } else {
                 message = "玉が足りません！";
             }
-        } else if ("feed".equals(action)) {
-            petCareLogic.feed(pet);
-            message = pet.getName() + " にごはんをあげたよ！";
-        } else if ("play".equals(action)) {
-            petCareLogic.play(pet);
-            message = pet.getName() + " と遊んだよ！";
         }
 
         session.setAttribute("actionMessage", message);

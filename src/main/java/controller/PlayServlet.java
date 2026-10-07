@@ -20,17 +20,33 @@ public class PlayServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setAttribute("items", PetCareLogic.PLAY_ITEMS);
         request.getRequestDispatcher("/WEB-INF/jsp/play.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=UTF-8");
+
         HttpSession session = request.getSession();
         Pet pet = (Pet) session.getAttribute("pet");
+
+        boolean success = false;
         if (pet != null) {
-            petCareLogic.play(pet);
+            String itemId = request.getParameter("itemId");
+            success = petCareLogic.play(pet, itemId);
         }
-        response.sendRedirect(request.getContextPath() + "/play");
+
+        String json = String.format(
+            "{\"success\": %b, \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
+            success,
+            pet != null ? pet.getBalls().toString() : "0",
+            pet != null ? pet.getLevel() : 1,
+            pet != null ? pet.getExp().toString() : "0",
+            pet != null ? pet.getNextLevelExp().toString() : "2"
+        );
+        response.getWriter().write(json);
     }
 }
