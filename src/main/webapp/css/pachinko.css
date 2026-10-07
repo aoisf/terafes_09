@@ -1,0 +1,34 @@
+/* パチンコ画面 */
+.pachinko-section {
+    background: radial-gradient(circle, #001133, #000000);
+    flex-grow: 1;
+    border: 3px solid #cc0000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.jackpot-screen {
+    background: #111;
+    border: 2px solid #ffcc00;
+    text-align: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+}
+.jackpot-numbers {
+    color: #ff3333;
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 0 10px #ff0000;
+}
+.jackpot-text {
+    color: #ffcc00;
+    font-weight: bold;
+    margin: 5px 0;
+}
+.jackpot-details {
+    font-size: 0.8rem;
+    color: #add8e6;
+    margin: 0;
+}
