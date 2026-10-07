@@ -13,13 +13,13 @@
 </head>
 <body>
     <div class="app-container">
-        <jsp:include page="/WEB-INF/jsp/parts/header.jsp" />
-        <jsp:include page="/WEB-INF/jsp/parts/room.jsp" />
-        <jsp:include page="/WEB-INF/jsp/parts/pachinko.jsp" />
-        <jsp:include page="/WEB-INF/jsp/parts/control.jsp" />
-        <jsp:include page="/WEB-INF/jsp/parts/command.jsp" />
-        <jsp:include page="/WEB-INF/jsp/parts/footer.jsp" />
-    </div>
+    <%-- <jsp:include page="/WEB-INF/jsp/parts/header.jsp" /> --%>
+    <jsp:include page="/WEB-INF/jsp/parts/room.jsp" />
+    <jsp:include page="/WEB-INF/jsp/parts/pachinko.jsp" />
+    <jsp:include page="/WEB-INF/jsp/parts/control.jsp" />
+    <jsp:include page="/WEB-INF/jsp/parts/command.jsp" />
+    <%-- <jsp:include page="/WEB-INF/jsp/parts/footer.jsp" /> --%>
+</div>
 
     <!-- 分割したJSを読み込み -->
     <script src="${pageContext.request.contextPath}/js/pachinko.js"></script>

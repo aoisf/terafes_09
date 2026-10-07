@@ -1,11 +1,12 @@
 /* 育成ルーム */
 .room-section {
-    background: #fdf5e6;
-    height: 150px;
+    background: #ffffff; /* または背景と同じ #a0d8ef */
+    height: 140px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-top: 10px; /* 一番上との隙間を少し整える */
 }
 .pet-name {
     background: white;
