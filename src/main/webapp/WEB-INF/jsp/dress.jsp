@@ -8,18 +8,23 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css">
 </head>
 <body>
-    <div class="app-container">
-        <jsp:include page="/WEB-INF/jsp/parts/header.jsp" />
-        <div class="subpage-container">
-            <h2>クローゼット</h2>
-            <p>${pet.name} のおきがえ</p>
-            <div class="wardrobe-list">
-                <div class="item-card"><p>ふつうの服</p><button disabled>着用中</button></div>
-                <div class="item-card"><p>パチンコ法被</p><button>着替える</button></div>
+    <div class="app-container page-dress">
+        <h2 class="subpage-title">クローゼット</h2>
+        <p class="subpage-subtitle">${pet.name} のおきがえ</p>
+
+        <div class="wardrobe-list">
+            <div class="item-card">
+                <p class="wardrobe-name">ふつうの服</p>
+                <button class="cmd-btn dress-btn" disabled>着用中</button>
             </div>
-            <div>
-                <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
+            <div class="item-card">
+                <p class="wardrobe-name">パチンコ法被</p>
+                <button class="cmd-btn dress-btn">着替える</button>
             </div>
+        </div>
+
+        <div class="footer-area">
+            <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
         </div>
     </div>
     <script src="${pageContext.request.contextPath}/js/dress.js"></script>

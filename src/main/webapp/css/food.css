@@ -1,30 +1,68 @@
-.subpage-container {
-    padding: 15px;
+.page-food {
+    background-color: #fffdf5;
     text-align: center;
-    background-color: #fff9e6;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
+
+.subpage-title {
+    margin: 5px 0 10px 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.status-summary {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.status-summary p {
+    margin: 0;
+}
+
 .menu-grid {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 8px;
+    margin: 10px 0 20px 0;
 }
+
 .food-card {
     background: white;
     border: 2px solid #ffaa00;
     border-radius: 10px;
-    padding: 12px;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
 }
-.back-link {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 8px 16px;
-    background: #555;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
+
+.item-info {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-name {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+}
+
+.item-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.food-card .cmd-btn {
+    width: 180px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.footer-area {
+    margin: 20px 0 10px 0;
 }
