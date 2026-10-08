@@ -103,14 +103,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // まず1回目を即時実行
         playPachinko();
 
-        // 0.1秒間隔で連続実行
+        // 1秒間に約500回の間隔で連続実行
         autoTimer = setInterval(function() {
             if (!isRunning) {
                 stopAuto();
                 return;
             }
             playPachinko();
-        }, 100);
+        }, 2);
     }
 
     // オート停止

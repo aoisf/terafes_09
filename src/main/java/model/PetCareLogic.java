@@ -19,7 +19,7 @@ public class PetCareLogic {
         new CareItem("food_7", "超高密度プラチナペレット", new BigInteger("100000000"), BigInteger.valueOf(1073741824)),
         new CareItem("food_8", "暗黒物質の煮凝り", new BigInteger("100000000000"), new BigInteger("1099511627776")),
         new CareItem("food_9", "ビッグバン凝縮スープ", new BigInteger("1000000000000000"), new BigInteger("1152921504606846976")),
-        new CareItem("food_10", "全知全能オメガパチゼリー", new BigInteger("1000000000000000000000000"), new BigInteger("100000000000000000000000000000"))
+        new CareItem("food_10", "全知全能オメガパチゼリー", new BigInteger("10000000000000000000000"), new BigInteger("1000000000000000000000000000"))
     };
 
     // あそぶ10段階のデータ
@@ -33,7 +33,7 @@ public class PetCareLogic {
         new CareItem("play_7", "重力子加速シミュ", new BigInteger("150000000"), BigInteger.valueOf(1610612736)),
         new CareItem("play_8", "恒星系メガパチンコ大会", new BigInteger("150000000000"), new BigInteger("1649267441664")),
         new CareItem("play_9", "因果律書き換えスロットル", new BigInteger("1500000000000000"), new BigInteger("1729382256910270464")),
-        new CareItem("play_10", "多元宇宙ビッグループ崩壊劇", new BigInteger("1500000000000000000000000"), new BigInteger("200000000000000000000000000000"))
+        new CareItem("play_10", "多元宇宙ビッグループ崩壊劇", new BigInteger("15000000000000000000000"), new BigInteger("2000000000000000000000000000"))
     };
 
     // レベルに応じたパチンコ大当たり獲得玉数（インフレ計算）
