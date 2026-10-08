@@ -38,21 +38,22 @@ public class PetCareLogic {
 
     // レベルに応じたパチンコ大当たり獲得玉数（インフレ計算）
     public BigInteger calculateJackpotPayout(int level) {
-        // 基本出玉300発 + (level - 1) 乗の拡大係数 (約1.5倍ずつ増加)
         BigInteger base = BigInteger.valueOf(300);
         if (level <= 1) return base;
         
-        // 3^((level-1)/2) 程度で適度にインフレ
         BigInteger multiplier = BigInteger.valueOf(3).pow((level - 1) / 2 + 1);
         return base.multiply(multiplier);
     }
 
-    // ごはん実行（成功時 true）
-    public boolean feed(Pet pet, String itemId) {
+    // ごはん実行（まとめ買い対応）
+    public boolean feed(Pet pet, String itemId, int count) {
+        if (count <= 0) return false;
         for (CareItem item : FOOD_ITEMS) {
             if (item.id().equals(itemId)) {
-                if (consumeBalls(pet, item.cost())) {
-                    addExp(pet, item.expGain());
+                BigInteger totalCost = item.cost().multiply(BigInteger.valueOf(count));
+                if (consumeBalls(pet, totalCost)) {
+                    BigInteger totalExp = item.expGain().multiply(BigInteger.valueOf(count));
+                    addExp(pet, totalExp);
                     return true;
                 }
                 return false;
@@ -61,18 +62,29 @@ public class PetCareLogic {
         return false;
     }
 
-    // あそぶ実行（成功時 true）
-    public boolean play(Pet pet, String itemId) {
+    public boolean feed(Pet pet, String itemId) {
+        return feed(pet, itemId, 1);
+    }
+
+    // あそぶ実行（まとめ買い対応）
+    public boolean play(Pet pet, String itemId, int count) {
+        if (count <= 0) return false;
         for (CareItem item : PLAY_ITEMS) {
             if (item.id().equals(itemId)) {
-                if (consumeBalls(pet, item.cost())) {
-                    addExp(pet, item.expGain());
+                BigInteger totalCost = item.cost().multiply(BigInteger.valueOf(count));
+                if (consumeBalls(pet, totalCost)) {
+                    BigInteger totalExp = item.expGain().multiply(BigInteger.valueOf(count));
+                    addExp(pet, totalExp);
                     return true;
                 }
                 return false;
             }
         }
         return false;
+    }
+
+    public boolean play(Pet pet, String itemId) {
+        return play(pet, itemId, 1);
     }
 
     // 経験値加算とレベルアップ計算

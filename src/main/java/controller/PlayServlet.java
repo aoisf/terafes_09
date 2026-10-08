@@ -36,7 +36,13 @@ public class PlayServlet extends HttpServlet {
         boolean success = false;
         if (pet != null) {
             String itemId = request.getParameter("itemId");
-            success = petCareLogic.play(pet, itemId);
+            int count = 1;
+            try {
+                count = Integer.parseInt(request.getParameter("count"));
+            } catch (Exception e) {
+                count = 1;
+            }
+            success = petCareLogic.play(pet, itemId, count);
         }
 
         String json = String.format(

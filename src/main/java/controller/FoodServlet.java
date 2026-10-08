@@ -36,10 +36,15 @@ public class FoodServlet extends HttpServlet {
         boolean success = false;
         if (pet != null) {
             String itemId = request.getParameter("itemId");
-            success = petCareLogic.feed(pet, itemId);
+            int count = 1;
+            try {
+                count = Integer.parseInt(request.getParameter("count"));
+            } catch (Exception e) {
+                count = 1;
+            }
+            success = petCareLogic.feed(pet, itemId, count);
         }
 
-        // JSON を組み立てて返す
         String json = String.format(
             "{\"success\": %b, \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
             success,

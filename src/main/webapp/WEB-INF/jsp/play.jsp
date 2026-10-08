@@ -15,7 +15,6 @@
             <p>所持玉数: <strong id="balls-display" style="color:#d9534f; font-size:1.2rem;">${pet.balls} 発</strong></p>
             <p id="level-display">LV: ${pet.level} (EXP: ${pet.exp} / ${pet.nextLevelExp})</p>
         </div>
-        <p id="msg-display" style="color:red; font-weight:bold; min-height:1.2em; margin:4px 0;"></p>
 
         <div class="menu-grid">
             <%
@@ -23,14 +22,21 @@
                 if (items != null) {
                     for (CareItem item : items) {
             %>
-                <form action="${pageContext.request.contextPath}/play" method="post" class="play-card care-form">
-                    <input type="hidden" name="itemId" value="<%= item.id() %>">
+                <div class="play-card" data-cost="<%= item.cost().toString() %>" data-id="<%= item.id() %>">
                     <div class="item-info">
                         <span class="item-name"><%= item.name() %></span>
-                        <span class="item-meta">消費: <%= item.cost() %> 発 / 獲得EXP: +<%= item.expGain() %></span>
+                        <span class="item-meta">1回消費: <%= item.cost() %> 発 / 獲得EXP: +<%= item.expGain() %></span>
                     </div>
-                    <button type="submit" class="cmd-btn play">購入してあそぶ</button>
-                </form>
+                    <div class="action-box">
+                        <span class="affordable-count">あそべる数: <strong class="count-val">0</strong></span>
+                        <div class="buy-buttons">
+                            <button type="button" class="btn-play" data-count="1">1回</button>
+                            <button type="button" class="btn-play" data-count="10">10回</button>
+                            <button type="button" class="btn-play" data-count="100">100回</button>
+                            <button type="button" class="btn-play" data-count="1000">1000回</button>
+                        </div>
+                    </div>
+                </div>
             <%
                     }
                 }
@@ -41,6 +47,98 @@
             <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
         </div>
     </div>
-    <script src="${pageContext.request.contextPath}/js/play.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ballsDisplay = document.getElementById('balls-display');
+            var levelDisplay = document.getElementById('level-display');
+            var cards = document.querySelectorAll('.play-card');
+
+            var currentBalls = BigInt("${pet.balls}");
+
+            function updateAffordableCounts() {
+                cards.forEach(function(card) {
+                    var cost = BigInt(card.getAttribute('data-cost'));
+                    var countVal = card.querySelector('.count-val');
+                    var buttons = card.querySelectorAll('.btn-play');
+
+                    if (cost === 0n) {
+                        countVal.textContent = '∞';
+                        buttons.forEach(function(b) { b.classList.remove('disabled'); });
+                    } else {
+                        var maxAffordable = currentBalls / cost;
+                        countVal.textContent = maxAffordable.toLocaleString() + '回';
+                        buttons.forEach(function(b) {
+                            var needed = BigInt(b.getAttribute('data-count'));
+                            if (maxAffordable < needed) {
+                                b.classList.add('disabled');
+                            } else {
+                                b.classList.remove('disabled');
+                            }
+                        });
+                    }
+                });
+            }
+
+            function showBubble(targetBtn, text) {
+                var parent = targetBtn.closest('.action-box');
+                var existing = parent.querySelector('.bubble-popup');
+                if (existing) existing.remove();
+
+                var bubble = document.createElement('div');
+                bubble.className = 'bubble-popup';
+                bubble.textContent = text;
+                parent.appendChild(bubble);
+
+                setTimeout(function() {
+                    bubble.classList.add('fade-out');
+                    setTimeout(function() { bubble.remove(); }, 300);
+                }, 1800);
+            }
+
+            updateAffordableCounts();
+
+            cards.forEach(function(card) {
+                var itemId = card.getAttribute('data-id');
+                var cost = BigInt(card.getAttribute('data-cost'));
+
+                card.querySelectorAll('.btn-play').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var count = parseInt(btn.getAttribute('data-count'), 10);
+                        var totalCost = cost * BigInt(count);
+
+                        if (cost > 0n && currentBalls < totalCost) {
+                            showBubble(btn, '玉が足りないよ！');
+                            return;
+                        }
+
+                        var params = new URLSearchParams();
+                        params.append('itemId', itemId);
+                        params.append('count', count);
+
+                        fetch('${pageContext.request.contextPath}/play', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: params.toString()
+                        })
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                currentBalls = BigInt(data.balls);
+                                if (ballsDisplay) ballsDisplay.textContent = data.balls + ' 発';
+                                if (levelDisplay) levelDisplay.textContent = 'LV: ' + data.level + ' (EXP: ' + data.exp + ' / ' + data.nextExp + ')';
+                                updateAffordableCounts();
+                            } else {
+                                showBubble(btn, '玉が足りないよ！');
+                            }
+                        })
+                        .catch(function(err) {
+                            console.error(err);
+                        });
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
