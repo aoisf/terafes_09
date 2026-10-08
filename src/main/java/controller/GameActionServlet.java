@@ -38,6 +38,28 @@ public class GameActionServlet extends HttpServlet {
         boolean isHit = false;
         boolean canPlay = false;
 
+        // 救済アクション（玉が0のときのミニゲーム報酬）
+        if ("rescue".equals(action)) {
+            String type = request.getParameter("type");
+            long reward = 0;
+            if ("pick".equals(type)) reward = 10;
+            else if ("help".equals(type)) reward = 100;
+            else if ("work".equals(type)) reward = 1000;
+
+            if (reward > 0) {
+                petCareLogic.addRescueBalls(pet, reward);
+            }
+
+            response.setContentType("application/json; charset=UTF-8");
+            String json = String.format(
+                "{\"success\": true, \"balls\": \"%s\", \"reward\": %d}",
+                pet.getBalls().toString(),
+                reward
+            );
+            response.getWriter().write(json);
+            return;
+        }
+
         if ("pachinko".equals(action)) {
             // パチンコ実行 (10発消費)
             if (petCareLogic.consumeBalls(pet, 10)) {

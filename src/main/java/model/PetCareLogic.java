@@ -10,7 +10,7 @@ public class PetCareLogic {
     public record CareItem(String id, String name, BigInteger cost, BigInteger expGain) {}
 
     public static final CareItem[] FOOD_ITEMS = {
-        new CareItem("food_1", "定番かりかりフード", BigInteger.ZERO, BigInteger.valueOf(2)),
+        new CareItem("food_1", "定番かりかりフード", BigInteger.ONE, BigInteger.valueOf(2)),
         new CareItem("food_2", "余り玉のヤクルト", BigInteger.valueOf(10), BigInteger.valueOf(8)),
         new CareItem("food_3", "特製勝カレー", BigInteger.valueOf(50), BigInteger.valueOf(64)),
         new CareItem("food_4", "特上A5霜降りパチ牛", BigInteger.valueOf(500), BigInteger.valueOf(1024)),
@@ -24,7 +24,7 @@ public class PetCareLogic {
 
     // あそぶ10段階のデータ
     public static final CareItem[] PLAY_ITEMS = {
-        new CareItem("play_1", "じゃんけんあそび", BigInteger.ZERO, BigInteger.valueOf(3)),
+        new CareItem("play_1", "じゃんけんあそび", BigInteger.ONE, BigInteger.valueOf(3)),
         new CareItem("play_2", "ピカピカ銀玉みがき", BigInteger.valueOf(15), BigInteger.valueOf(12)),
         new CareItem("play_3", "ハンドル固定の練習", BigInteger.valueOf(80), BigInteger.valueOf(96)),
         new CareItem("play_4", "パチンコ実機解体ショー", BigInteger.valueOf(800), BigInteger.valueOf(1536)),
@@ -45,14 +45,14 @@ public class PetCareLogic {
         return base.multiply(multiplier);
     }
 
-    // ごはん実行（まとめ買い対応）
-    public boolean feed(Pet pet, String itemId, int count) {
-        if (count <= 0) return false;
+    // ごはん実行（BigIntegerまとめ買い対応）
+    public boolean feed(Pet pet, String itemId, BigInteger count) {
+        if (count == null || count.compareTo(BigInteger.ZERO) <= 0) return false;
         for (CareItem item : FOOD_ITEMS) {
             if (item.id().equals(itemId)) {
-                BigInteger totalCost = item.cost().multiply(BigInteger.valueOf(count));
+                BigInteger totalCost = item.cost().multiply(count);
                 if (consumeBalls(pet, totalCost)) {
-                    BigInteger totalExp = item.expGain().multiply(BigInteger.valueOf(count));
+                    BigInteger totalExp = item.expGain().multiply(count);
                     addExp(pet, totalExp);
                     return true;
                 }
@@ -60,20 +60,24 @@ public class PetCareLogic {
             }
         }
         return false;
+    }
+
+    public boolean feed(Pet pet, String itemId, int count) {
+        return feed(pet, itemId, BigInteger.valueOf(count));
     }
 
     public boolean feed(Pet pet, String itemId) {
-        return feed(pet, itemId, 1);
+        return feed(pet, itemId, BigInteger.ONE);
     }
 
-    // あそぶ実行（まとめ買い対応）
-    public boolean play(Pet pet, String itemId, int count) {
-        if (count <= 0) return false;
+    // あそぶ実行（BigIntegerまとめ買い対応）
+    public boolean play(Pet pet, String itemId, BigInteger count) {
+        if (count == null || count.compareTo(BigInteger.ZERO) <= 0) return false;
         for (CareItem item : PLAY_ITEMS) {
             if (item.id().equals(itemId)) {
-                BigInteger totalCost = item.cost().multiply(BigInteger.valueOf(count));
+                BigInteger totalCost = item.cost().multiply(count);
                 if (consumeBalls(pet, totalCost)) {
-                    BigInteger totalExp = item.expGain().multiply(BigInteger.valueOf(count));
+                    BigInteger totalExp = item.expGain().multiply(count);
                     addExp(pet, totalExp);
                     return true;
                 }
@@ -83,8 +87,12 @@ public class PetCareLogic {
         return false;
     }
 
+    public boolean play(Pet pet, String itemId, int count) {
+        return play(pet, itemId, BigInteger.valueOf(count));
+    }
+
     public boolean play(Pet pet, String itemId) {
-        return play(pet, itemId, 1);
+        return play(pet, itemId, BigInteger.ONE);
     }
 
     // 経験値加算とレベルアップ計算
@@ -133,5 +141,12 @@ public class PetCareLogic {
     // パチンコ当たり加算
     public void handlePachinkoHit(Pet pet, BigInteger payout) {
         pet.setBalls(pet.getBalls().add(payout));
+    }
+
+    // 救済用の玉加算
+    public void addRescueBalls(Pet pet, long amount) {
+        if (amount > 0) {
+            pet.setBalls(pet.getBalls().add(BigInteger.valueOf(amount)));
+        }
     }
 }

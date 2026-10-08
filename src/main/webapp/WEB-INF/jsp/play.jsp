@@ -34,6 +34,7 @@
                             <button type="button" class="btn-play" data-count="10">10回</button>
                             <button type="button" class="btn-play" data-count="100">100回</button>
                             <button type="button" class="btn-play" data-count="1000">1000回</button>
+                            <button type="button" class="btn-play btn-max" data-count="max">MAX</button>
                         </div>
                     </div>
                 </div>
@@ -62,21 +63,27 @@
                     var countVal = card.querySelector('.count-val');
                     var buttons = card.querySelectorAll('.btn-play');
 
-                    if (cost === 0n) {
-                        countVal.textContent = '∞';
-                        buttons.forEach(function(b) { b.classList.remove('disabled'); });
-                    } else {
-                        var maxAffordable = currentBalls / cost;
-                        countVal.textContent = maxAffordable.toLocaleString() + '回';
-                        buttons.forEach(function(b) {
-                            var needed = BigInt(b.getAttribute('data-count'));
+                    var maxAffordable = currentBalls / cost;
+                    card.setAttribute('data-max', maxAffordable.toString());
+                    countVal.textContent = maxAffordable.toLocaleString() + '回';
+
+                    buttons.forEach(function(b) {
+                        var target = b.getAttribute('data-count');
+                        if (target === 'max') {
+                            if (maxAffordable <= 0n) {
+                                b.classList.add('disabled');
+                            } else {
+                                b.classList.remove('disabled');
+                            }
+                        } else {
+                            var needed = BigInt(target);
                             if (maxAffordable < needed) {
                                 b.classList.add('disabled');
                             } else {
                                 b.classList.remove('disabled');
                             }
-                        });
-                    }
+                        }
+                    });
                 });
             }
 
@@ -104,17 +111,23 @@
 
                 card.querySelectorAll('.btn-play').forEach(function(btn) {
                     btn.addEventListener('click', function() {
-                        var count = parseInt(btn.getAttribute('data-count'), 10);
-                        var totalCost = cost * BigInt(count);
+                        var targetCount = btn.getAttribute('data-count');
+                        var count = 0n;
 
-                        if (cost > 0n && currentBalls < totalCost) {
+                        if (targetCount === 'max') {
+                            count = currentBalls / cost;
+                        } else {
+                            count = BigInt(targetCount);
+                        }
+
+                        if (count <= 0n || currentBalls < (cost * count)) {
                             showBubble(btn, '玉が足りないよ！');
                             return;
                         }
 
                         var params = new URLSearchParams();
                         params.append('itemId', itemId);
-                        params.append('count', count);
+                        params.append('count', count.toString());
 
                         fetch('${pageContext.request.contextPath}/play', {
                             method: 'POST',

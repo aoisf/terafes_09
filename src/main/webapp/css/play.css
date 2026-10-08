@@ -82,6 +82,8 @@
 .buy-buttons {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .btn-play {
@@ -96,6 +98,12 @@
     box-shadow: 0 2px 0 #449944;
     transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
     white-space: nowrap;
+}
+
+.btn-play.btn-max {
+    background: #2e7d32;
+    color: white;
+    box-shadow: 0 2px 0 #1b5e20;
 }
 
 .btn-play:active {

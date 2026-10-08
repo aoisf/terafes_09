@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -36,11 +37,14 @@ public class PlayServlet extends HttpServlet {
         boolean success = false;
         if (pet != null) {
             String itemId = request.getParameter("itemId");
-            int count = 1;
+            BigInteger count = BigInteger.ONE;
             try {
-                count = Integer.parseInt(request.getParameter("count"));
+                String countParam = request.getParameter("count");
+                if (countParam != null && !countParam.isEmpty()) {
+                    count = new BigInteger(countParam);
+                }
             } catch (Exception e) {
-                count = 1;
+                count = BigInteger.ONE;
             }
             success = petCareLogic.play(pet, itemId, count);
         }

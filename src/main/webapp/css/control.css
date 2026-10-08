@@ -12,17 +12,27 @@
     align-items: center;
     margin-bottom: 12px;
     font-size: 0.95rem;
+    gap: 10px;
+}
+
+.ball-count {
+    word-break: break-all;
+    flex: 1;
 }
 
 .ball-count span {
     color: #ffcc00;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: bold;
     margin-left: 5px;
 }
 
+.toggles {
+    white-space: nowrap;
+}
+
 .toggles label {
-    margin-left: 15px;
+    margin-left: 10px;
     cursor: pointer;
 }
 
