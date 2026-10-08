@@ -1,5 +1,0 @@
-通常アクセス
-http://localhost:8080/パチンコ/main
-
-ステータスリセット状態でアクセス
-http://localhost:8080/パチンコ/main?reset=true
