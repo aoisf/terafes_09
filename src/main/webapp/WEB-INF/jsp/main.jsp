@@ -8,7 +8,7 @@
     <!-- 分割したCSSを読み込み -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=6">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css">
 </head>
@@ -62,7 +62,7 @@
         }
     %>
 
-    <script src="${pageContext.request.contextPath}/js/pachinko.js"></script>
+    <script src="${pageContext.request.contextPath}/js/pachinko.js?v=5"></script>
     <script src="${pageContext.request.contextPath}/js/command.js"></script>
     <script src="${pageContext.request.contextPath}/js/rescue.js"></script>
 </body>

@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var isRunning = false;
     var isFetching = false; // 通信の重複防止フラグ
 
+    // 初期状態とオート切替に合わせて盤面の案内を更新
+    if (typeof setPachinkoAutoMode === 'function') {
+        setPachinkoAutoMode(autoToggle && autoToggle.checked);
+    }
+
     // トーストポップアップ表示
     function showToast(message, isHit) {
         var existing = document.getElementById('result-toast');
@@ -59,6 +64,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function playPachinko() {
         if (isFetching) return;
         isFetching = true;
+        var showReels = !autoToggle || !autoToggle.checked;
+        var spinStartedAt = Date.now();
+        if (showReels && typeof startPachinkoSpin === 'function') {
+            startPachinkoSpin();
+        }
+
+        function finishPachinkoRequest(result, callback, winningSymbol) {
+            var delay = showReels ? Math.max(0, 600 - (Date.now() - spinStartedAt)) : 0;
+            setTimeout(function() {
+                if (autoToggle && autoToggle.checked && typeof setPachinkoAutoMode === 'function') {
+                    setPachinkoAutoMode(true);
+                } else if (showReels && typeof stopPachinkoSpin === 'function') {
+                    stopPachinkoSpin(result, winningSymbol);
+                }
+                isFetching = false;
+                callback();
+            }, delay);
+        }
 
         fetch(actionUrl, {
             method: 'POST',
@@ -72,30 +95,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return res.json();
         })
         .then(function(data) {
-            isFetching = false;
             if (data.canPlay) {
                 if (ballDisplay) {
                     ballDisplay.textContent = data.balls + '発';
                 }
-                // 大当たりのときは必ず表示。オート中のハズレは画面がチラつかないよう大当たりのみ通知
-                if (data.hit || !isRunning) {
-                    showToast(data.message, data.hit);
-                }
+                finishPachinkoRequest(data.hit ? 'hit' : 'miss', function() {
+                    // 大当たりのときは必ず表示。オート中のハズレは画面がチラつかないよう大当たりのみ通知
+                    if (data.hit || !isRunning) {
+                        showToast(data.message, data.hit);
+                    }
+                }, data.symbol);
             } else {
-                showToast('玉が足りません！', false);
-                stopAuto();
+                finishPachinkoRequest('empty', function() {
+                    showToast('玉が足りません！', false);
+                    stopAuto();
+                });
             }
         })
         .catch(function(err) {
-            isFetching = false;
-            console.error('通信エラー:', err);
-            stopAuto();
+            finishPachinkoRequest('empty', function() {
+                console.error('通信エラー:', err);
+                stopAuto();
+            });
         });
     }
 
     // オート開始
     function startAuto() {
         isRunning = true;
+        if (typeof setPachinkoAutoMode === 'function') {
+            setPachinkoAutoMode(true);
+        }
         startBtn.textContent = 'ストップ！';
         startBtn.style.background = 'linear-gradient(to bottom, #777, #333)';
         startBtn.style.boxShadow = '0 4px 0 #111';
@@ -146,6 +176,9 @@ document.addEventListener('DOMContentLoaded', function() {
         autoToggle.addEventListener('change', function() {
             if (!autoToggle.checked && isRunning) {
                 stopAuto();
+            }
+            if (typeof setPachinkoAutoMode === 'function') {
+                setPachinkoAutoMode(autoToggle.checked);
             }
         });
     }

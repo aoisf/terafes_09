@@ -18,6 +18,8 @@ import model.PetCareLogic;
 public class GameActionServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String RESCUE_CLAIMED_ATTRIBUTE = "rescueClaimed";
+    private static final String[] SLOT_SYMBOLS = { "○", "□", "△", "☆" };
+    private static final int[] SLOT_BASE_PAYOUTS = { 100, 200, 300, 500 };
     private final Random random = new Random();
     private final PetCareLogic petCareLogic = new PetCareLogic();
 
@@ -36,6 +38,7 @@ public class GameActionServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         String message = "";
+        String slotSymbol = "";
         boolean isHit = false;
         boolean canPlay = false;
 
@@ -78,11 +81,15 @@ public class GameActionServlet extends HttpServlet {
                 // パチンコ実行 (10発消費)
                 if (petCareLogic.consumeBalls(pet, 10)) {
                     canPlay = true;
-                    if (random.nextInt(5) == 0) {
+                    int result = random.nextInt(20);
+                    if (result < SLOT_SYMBOLS.length) {
                         isHit = true;
-                        BigInteger payout = petCareLogic.calculateJackpotPayout(pet.getLevel());
+                        slotSymbol = SLOT_SYMBOLS[result];
+                        BigInteger payout = petCareLogic.calculateJackpotPayout(
+                            pet.getLevel(), SLOT_BASE_PAYOUTS[result]
+                        );
                         petCareLogic.handlePachinkoHit(pet, payout);
-                        message = "大当り！" + payout + "発 獲得！";
+                        message = "大当り！「" + slotSymbol + "」が3つ揃い！ " + payout + "発 獲得！";
                     } else {
                         message = "ハズレ… 10発消費";
                     }
@@ -97,9 +104,10 @@ public class GameActionServlet extends HttpServlet {
         if (accept != null && accept.contains("application/json")) {
             response.setContentType("application/json; charset=UTF-8");
             String json = String.format(
-                "{\"canPlay\": %b, \"hit\": %b, \"message\": \"%s\", \"balls\": \"%s\"}",
+                "{\"canPlay\": %b, \"hit\": %b, \"symbol\": \"%s\", \"message\": \"%s\", \"balls\": \"%s\"}",
                 canPlay,
                 isHit,
+                slotSymbol,
                 message,
                 pet.getBalls().toString()
             );

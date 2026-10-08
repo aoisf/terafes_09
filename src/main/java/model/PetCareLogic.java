@@ -38,9 +38,14 @@ public class PetCareLogic {
 
     // レベルに応じたパチンコ大当たり獲得玉数（インフレ計算）
     public BigInteger calculateJackpotPayout(int level) {
-        BigInteger base = BigInteger.valueOf(300);
+        return calculateJackpotPayout(level, 300);
+    }
+
+    // 記号ごとの基準払い出しに、従来どおりのレベル倍率を適用する。
+    public BigInteger calculateJackpotPayout(int level, int basePayout) {
+        BigInteger base = BigInteger.valueOf(basePayout);
         if (level <= 1) return base;
-        
+
         BigInteger multiplier = BigInteger.valueOf(3).pow((level - 1) / 2 + 1);
         return base.multiply(multiplier);
     }
