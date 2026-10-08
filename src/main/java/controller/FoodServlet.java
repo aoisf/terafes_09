@@ -36,17 +36,22 @@ public class FoodServlet extends HttpServlet {
 
         boolean success = false;
         if (pet != null) {
-            String itemId = request.getParameter("itemId");
-            BigInteger count = BigInteger.ONE;
-            try {
-                String countParam = request.getParameter("count");
-                if (countParam != null && !countParam.isEmpty()) {
-                    count = new BigInteger(countParam);
+            synchronized (pet) {
+                if (pet.getBalls().signum() > 0) {
+                    session.removeAttribute("rescueClaimed");
                 }
-            } catch (Exception e) {
-                count = BigInteger.ONE;
+                String itemId = request.getParameter("itemId");
+                BigInteger count = BigInteger.ONE;
+                try {
+                    String countParam = request.getParameter("count");
+                    if (countParam != null && !countParam.isEmpty()) {
+                        count = new BigInteger(countParam);
+                    }
+                } catch (Exception e) {
+                    count = BigInteger.ONE;
+                }
+                success = petCareLogic.feed(pet, itemId, count);
             }
-            success = petCareLogic.feed(pet, itemId, count);
         }
 
         String json = String.format(

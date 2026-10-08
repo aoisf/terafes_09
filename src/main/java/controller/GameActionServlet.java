@@ -17,6 +17,7 @@ import model.PetCareLogic;
 @WebServlet("/action")
 public class GameActionServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private static final String RESCUE_CLAIMED_ATTRIBUTE = "rescueClaimed";
     private final Random random = new Random();
     private final PetCareLogic petCareLogic = new PetCareLogic();
 
@@ -46,34 +47,48 @@ public class GameActionServlet extends HttpServlet {
             else if ("help".equals(type)) reward = 100;
             else if ("work".equals(type)) reward = 1000;
 
-            if (reward > 0) {
-                petCareLogic.addRescueBalls(pet, reward);
+            boolean success = false;
+            synchronized (pet) {
+                if (reward > 0 && pet.getBalls().signum() == 0
+                        && !Boolean.TRUE.equals(session.getAttribute(RESCUE_CLAIMED_ATTRIBUTE))) {
+                    petCareLogic.addRescueBalls(pet, reward);
+                    session.setAttribute(RESCUE_CLAIMED_ATTRIBUTE, Boolean.TRUE);
+                    success = true;
+                }
             }
 
             response.setContentType("application/json; charset=UTF-8");
             String json = String.format(
-                "{\"success\": true, \"balls\": \"%s\", \"reward\": %d}",
+                "{\"success\": %b, \"balls\": \"%s\", \"reward\": %d}",
+                success,
                 pet.getBalls().toString(),
-                reward
+                success ? reward : 0
             );
             response.getWriter().write(json);
             return;
         }
 
-        if ("pachinko".equals(action)) {
-            // パチンコ実行 (10発消費)
-            if (petCareLogic.consumeBalls(pet, 10)) {
-                canPlay = true;
-                if (random.nextInt(5) == 0) {
-                    isHit = true;
-                    BigInteger payout = petCareLogic.calculateJackpotPayout(pet.getLevel());
-                    petCareLogic.handlePachinkoHit(pet, payout);
-                    message = "大当り！" + payout + "発 獲得！";
+        synchronized (pet) {
+            // 玉が残っている状態で通常操作に入ったら、次の0発到達時の救済を再度許可する。
+            if (pet.getBalls().signum() > 0) {
+                session.removeAttribute(RESCUE_CLAIMED_ATTRIBUTE);
+            }
+
+            if ("pachinko".equals(action)) {
+                // パチンコ実行 (10発消費)
+                if (petCareLogic.consumeBalls(pet, 10)) {
+                    canPlay = true;
+                    if (random.nextInt(5) == 0) {
+                        isHit = true;
+                        BigInteger payout = petCareLogic.calculateJackpotPayout(pet.getLevel());
+                        petCareLogic.handlePachinkoHit(pet, payout);
+                        message = "大当り！" + payout + "発 獲得！";
+                    } else {
+                        message = "ハズレ… 10発消費";
+                    }
                 } else {
-                    message = "ハズレ… 10発消費";
+                    message = "玉が足りません！";
                 }
-            } else {
-                message = "玉が足りません！";
             }
         }
 

@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             playPachinko();
-        }, 1);
+        }, 100);
     }
 
     // オート停止
