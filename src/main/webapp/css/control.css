@@ -2,36 +2,44 @@
 .control-section {
     background: #2b3a5c;
     border: none;
-    padding: 10px;
+    padding: 15px;
     color: white;
 }
+
 .status-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    font-size: 0.8rem;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
 }
+
 .ball-count span {
     color: #ffcc00;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-weight: bold;
+    margin-left: 5px;
 }
+
 .toggles label {
-    margin-left: 10px;
+    margin-left: 15px;
+    cursor: pointer;
 }
+
 .start-button {
     width: 100%;
     background: linear-gradient(to bottom, #ff6666, #cc0000);
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: bold;
     border: 2px solid #ffcccc;
-    border-radius: 25px;
-    padding: 10px;
+    border-radius: 30px;
+    padding: 12px;
     box-shadow: 0 4px 0 #990000;
     cursor: pointer;
+    transition: transform 0.1s;
 }
+
 .start-button:active {
     transform: translateY(4px);
     box-shadow: none;
@@ -39,29 +47,43 @@
 
 /* 育成コマンド */
 .command-section {
-    background: transparent;
-    border: none;
-    padding: 10px 0;
+    background: #fdfdfd;
+    border: 2px dashed #999;
+    padding: 15px;
+    margin-top: 10px;
 }
+
 .section-label-small {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #333;
     font-weight: bold;
-    margin-left: 15px;
+    margin-bottom: 8px;
 }
+
 .command-buttons {
     display: flex;
-    justify-content: space-around;
-    margin-top: 5px;
+    justify-content: space-between;
+    gap: 15px;
 }
+
 .cmd-btn {
-    width: 30%;
-    padding: 10px 0;
-    border-radius: 15px;
+    flex: 1;
+    padding: 12px 0;
+    border-radius: 12px;
     font-weight: bold;
+    font-size: 1rem;
     border: 2px solid #333;
     cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.food { background: #ffaa00; }
-.play { background: #66cc66; }
-.dress { background: #66ccff; }
+
+.cmd-btn:hover {
+    opacity: 0.9;
+}
+
+.food { background: #ffaa00; color: #222; }
+.play { background: #66cc66; color: #222; }
+.dress { background: #66ccff; color: #222; }

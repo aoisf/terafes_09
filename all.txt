@@ -1,0 +1,1153 @@
+﻿`n===== C:\pleiades\workspace\パチンコ\src\main\java\controller\DressServlet.java =====`n
+package controller;
+
+import java.io.IOException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@WebServlet("/dress")
+public class DressServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/jsp/dress.jsp").forward(request, response);
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\java\controller\FoodServlet.java =====`n
+package controller;
+
+import java.io.IOException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import model.Pet;
+import model.PetCareLogic;
+
+@WebServlet("/food")
+public class FoodServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private final PetCareLogic petCareLogic = new PetCareLogic();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setAttribute("items", PetCareLogic.FOOD_ITEMS);
+        request.getRequestDispatcher("/WEB-INF/jsp/food.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=UTF-8");
+
+        HttpSession session = request.getSession();
+        Pet pet = (Pet) session.getAttribute("pet");
+
+        boolean success = false;
+        if (pet != null) {
+            String itemId = request.getParameter("itemId");
+            success = petCareLogic.feed(pet, itemId);
+        }
+
+        // JSON を組み立てて返す
+        String json = String.format(
+            "{\"success\": %b, \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
+            success,
+            pet != null ? pet.getBalls().toString() : "0",
+            pet != null ? pet.getLevel() : 1,
+            pet != null ? pet.getExp().toString() : "0",
+            pet != null ? pet.getNextLevelExp().toString() : "2"
+        );
+        response.getWriter().write(json);
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\java\controller\GameActionServlet.java =====`n
+package controller;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Random;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import model.Pet;
+import model.PetCareLogic;
+
+@WebServlet("/action")
+public class GameActionServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private final Random random = new Random();
+    private final PetCareLogic petCareLogic = new PetCareLogic();
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
+        Pet pet = (Pet) session.getAttribute("pet");
+
+        if (pet == null) {
+            pet = new Pet();
+            session.setAttribute("pet", pet);
+        }
+
+        String action = request.getParameter("action");
+        String message = "";
+        String jackpotResult = "";
+
+        if ("pachinko".equals(action)) {
+            // パチンコ実行 (10発消費)
+            if (petCareLogic.consumeBalls(pet, 10)) {
+                if (random.nextInt(5) == 0) {
+                    BigInteger payout = petCareLogic.calculateJackpotPayout(pet.getLevel());
+                    petCareLogic.handlePachinkoHit(pet, payout);
+                    jackpotResult = "7 7 7";
+                    message = "大当り！" + payout + "発 獲得！";
+                } else {
+                    jackpotResult = "3 4 8";
+                    message = "ハズレ… 10発消費";
+                }
+            } else {
+                message = "玉が足りません！";
+            }
+        }
+
+        session.setAttribute("actionMessage", message);
+        session.setAttribute("jackpotResult", jackpotResult);
+
+        response.sendRedirect(request.getContextPath() + "/main");
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\java\controller\MainServlet.java =====`n
+package controller;
+
+import java.io.IOException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import model.Pet;
+
+@WebServlet("/main")
+public class MainServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+
+        HttpSession session = request.getSession();
+
+        // URLに ?reset=true がついていたらセッションを破棄して再作成
+        if ("true".equals(request.getParameter("reset"))) {
+            session.invalidate();
+            session = request.getSession(true);
+        }
+
+        Pet pet = (Pet) session.getAttribute("pet");
+
+        if (pet == null) {
+            pet = new Pet();
+            session.setAttribute("pet", pet);
+        }
+
+        request.getRequestDispatcher("/WEB-INF/jsp/main.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\java\controller\PlayServlet.java =====`n
+package controller;
+
+import java.io.IOException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import model.Pet;
+import model.PetCareLogic;
+
+@WebServlet("/play")
+public class PlayServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private final PetCareLogic petCareLogic = new PetCareLogic();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setAttribute("items", PetCareLogic.PLAY_ITEMS);
+        request.getRequestDispatcher("/WEB-INF/jsp/play.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=UTF-8");
+
+        HttpSession session = request.getSession();
+        Pet pet = (Pet) session.getAttribute("pet");
+
+        boolean success = false;
+        if (pet != null) {
+            String itemId = request.getParameter("itemId");
+            success = petCareLogic.play(pet, itemId);
+        }
+
+        String json = String.format(
+            "{\"success\": %b, \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
+            success,
+            pet != null ? pet.getBalls().toString() : "0",
+            pet != null ? pet.getLevel() : 1,
+            pet != null ? pet.getExp().toString() : "0",
+            pet != null ? pet.getNextLevelExp().toString() : "2"
+        );
+        response.getWriter().write(json);
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\java\model\Pet.java =====`n
+package model;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+
+public class Pet implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private int level;          // LV (1 - 100)
+    private BigInteger exp;     // 現在の累積EXP
+    private BigInteger balls;   // 所持玉数（インフレ対応）
+
+    public Pet() {
+        this.name = "たまごろう";
+        this.level = 1;
+        this.exp = BigInteger.ZERO;
+        this.balls = BigInteger.valueOf(100);
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getLevel() { return level; }
+    public void setLevel(int level) { this.level = level; }
+
+    public BigInteger getExp() { return exp; }
+    public void setExp(BigInteger exp) { this.exp = exp; }
+
+    public BigInteger getBalls() { return balls; }
+    public void setBalls(BigInteger balls) { this.balls = balls; }
+
+    // 次のレベルまでに必要な経験値（2のlevel乗）
+    public BigInteger getNextLevelExp() {
+        return BigInteger.valueOf(2).pow(this.level);
+    }
+
+    // ゲージ表示用の進捗パーセント (0 - 100)
+    public int getExpPercent() {
+        if (this.level >= 100) return 100;
+        BigInteger next = getNextLevelExp();
+        if (next.equals(BigInteger.ZERO)) return 0;
+        return this.exp.multiply(BigInteger.valueOf(100)).divide(next).intValue();
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\java\model\PetCareLogic.java =====`n
+package model;
+
+import java.math.BigInteger;
+
+public class PetCareLogic {
+
+    public static final int MAX_LEVEL = 100;
+
+    // ごはん10段階のデータ (名前, 必要玉数, 獲得EXP)
+    public record CareItem(String id, String name, BigInteger cost, BigInteger expGain) {}
+
+    public static final CareItem[] FOOD_ITEMS = {
+        new CareItem("food_1", "定番かりかりフード", BigInteger.ZERO, BigInteger.valueOf(2)),
+        new CareItem("food_2", "余り玉のヤクルト", BigInteger.valueOf(10), BigInteger.valueOf(8)),
+        new CareItem("food_3", "特製勝カレー", BigInteger.valueOf(50), BigInteger.valueOf(64)),
+        new CareItem("food_4", "特上A5霜降りパチ牛", BigInteger.valueOf(500), BigInteger.valueOf(1024)),
+        new CareItem("food_5", "純金箔コーティング軍艦", BigInteger.valueOf(5000), BigInteger.valueOf(16384)),
+        new CareItem("food_6", "パチプロ秘伝精力薬膳鍋", BigInteger.valueOf(100000), BigInteger.valueOf(1048576)),
+        new CareItem("food_7", "超高密度プラチナペレット", new BigInteger("100000000"), BigInteger.valueOf(1073741824)),
+        new CareItem("food_8", "暗黒物質の煮凝り", new BigInteger("100000000000"), new BigInteger("1099511627776")),
+        new CareItem("food_9", "ビッグバン凝縮スープ", new BigInteger("1000000000000000"), new BigInteger("1152921504606846976")),
+        new CareItem("food_10", "全知全能オメガパチゼリー", new BigInteger("1000000000000000000000000"), new BigInteger("100000000000000000000000000000"))
+    };
+
+    // あそぶ10段階のデータ
+    public static final CareItem[] PLAY_ITEMS = {
+        new CareItem("play_1", "じゃんけんあそび", BigInteger.ZERO, BigInteger.valueOf(3)),
+        new CareItem("play_2", "ピカピカ銀玉みがき", BigInteger.valueOf(15), BigInteger.valueOf(12)),
+        new CareItem("play_3", "ハンドル固定の練習", BigInteger.valueOf(80), BigInteger.valueOf(96)),
+        new CareItem("play_4", "パチンコ実機解体ショー", BigInteger.valueOf(800), BigInteger.valueOf(1536)),
+        new CareItem("play_5", "島設備ドル箱タワー積み", BigInteger.valueOf(8000), BigInteger.valueOf(24576)),
+        new CareItem("play_6", "全台一斉フィーバーフェス", BigInteger.valueOf(150000), BigInteger.valueOf(1572864)),
+        new CareItem("play_7", "重力子加速シミュ", new BigInteger("150000000"), BigInteger.valueOf(1610612736)),
+        new CareItem("play_8", "恒星系メガパチンコ大会", new BigInteger("150000000000"), new BigInteger("1649267441664")),
+        new CareItem("play_9", "因果律書き換えスロットル", new BigInteger("1500000000000000"), new BigInteger("1729382256910270464")),
+        new CareItem("play_10", "多元宇宙ビッグループ崩壊劇", new BigInteger("1500000000000000000000000"), new BigInteger("200000000000000000000000000000"))
+    };
+
+    // レベルに応じたパチンコ大当たり獲得玉数（インフレ計算）
+    public BigInteger calculateJackpotPayout(int level) {
+        // 基本出玉300発 + (level - 1) 乗の拡大係数 (約1.5倍ずつ増加)
+        BigInteger base = BigInteger.valueOf(300);
+        if (level <= 1) return base;
+        
+        // 3^((level-1)/2) 程度で適度にインフレ
+        BigInteger multiplier = BigInteger.valueOf(3).pow((level - 1) / 2 + 1);
+        return base.multiply(multiplier);
+    }
+
+    // ごはん実行（成功時 true）
+    public boolean feed(Pet pet, String itemId) {
+        for (CareItem item : FOOD_ITEMS) {
+            if (item.id().equals(itemId)) {
+                if (consumeBalls(pet, item.cost())) {
+                    addExp(pet, item.expGain());
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // あそぶ実行（成功時 true）
+    public boolean play(Pet pet, String itemId) {
+        for (CareItem item : PLAY_ITEMS) {
+            if (item.id().equals(itemId)) {
+                if (consumeBalls(pet, item.cost())) {
+                    addExp(pet, item.expGain());
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // 経験値加算とレベルアップ計算
+    public void addExp(Pet pet, BigInteger gain) {
+        if (pet.getLevel() >= MAX_LEVEL) {
+            pet.setLevel(MAX_LEVEL);
+            pet.setExp(BigInteger.ZERO);
+            return;
+        }
+
+        BigInteger currentExp = pet.getExp().add(gain);
+        int currentLevel = pet.getLevel();
+
+        while (currentLevel < MAX_LEVEL) {
+            BigInteger neededExp = BigInteger.valueOf(2).pow(currentLevel);
+            if (currentExp.compareTo(neededExp) >= 0) {
+                currentExp = currentExp.subtract(neededExp);
+                currentLevel++;
+            } else {
+                break;
+            }
+        }
+
+        if (currentLevel >= MAX_LEVEL) {
+            currentLevel = MAX_LEVEL;
+            currentExp = BigInteger.ZERO;
+        }
+
+        pet.setLevel(currentLevel);
+        pet.setExp(currentExp);
+    }
+
+    // 玉消費 (BigInteger対応)
+    public boolean consumeBalls(Pet pet, BigInteger amount) {
+        if (pet.getBalls().compareTo(amount) >= 0) {
+            pet.setBalls(pet.getBalls().subtract(amount));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean consumeBalls(Pet pet, int amount) {
+        return consumeBalls(pet, BigInteger.valueOf(amount));
+    }
+
+    // パチンコ当たり加算
+    public void handlePachinkoHit(Pet pet, BigInteger payout) {
+        pet.setBalls(pet.getBalls().add(payout));
+    }
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\common.css =====`n
+/* 基本設定 */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #e0e0e0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+/* 全体コンテナ */
+.app-container {
+    width: 100%;
+    max-width: 400px;
+    height: 750px;
+    background-color: #a0d8ef;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 10px; 
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* 各セクション共通枠 */
+section {
+    margin: 5px 10px;
+    border-radius: 10px;
+    position: relative;
+    border: 2px solid #333;
+}
+.section-label {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: #333;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    z-index: 1;
+}
+
+/* ヘッダー */
+.header {
+    text-align: center;
+    padding: 10px;
+    background: #fff;
+    border-radius: 0 0 15px 15px;
+    margin-bottom: 10px;
+}
+.title-logo {
+    color: #ff6699;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 2px white;
+}
+
+/* フッターナビ */
+.footer-nav {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 5px 0;
+    border-top: 1px solid #ccc;
+    border-radius: 15px 15px 0 0;
+}
+.nav-item {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #555;
+    cursor: pointer;
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\control.css =====`n
+/* 操作パネル */
+.control-section {
+    background: #2b3a5c;
+    border: none;
+    padding: 10px;
+    color: white;
+}
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+}
+.ball-count span {
+    color: #ffcc00;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.toggles label {
+    margin-left: 10px;
+}
+.start-button {
+    width: 100%;
+    background: linear-gradient(to bottom, #ff6666, #cc0000);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 2px solid #ffcccc;
+    border-radius: 25px;
+    padding: 10px;
+    box-shadow: 0 4px 0 #990000;
+    cursor: pointer;
+}
+.start-button:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+/* 育成コマンド */
+.command-section {
+    background: transparent;
+    border: none;
+    padding: 10px 0;
+}
+.section-label-small {
+    font-size: 0.8rem;
+    color: #333;
+    font-weight: bold;
+    margin-left: 15px;
+}
+.command-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
+}
+.cmd-btn {
+    width: 30%;
+    padding: 10px 0;
+    border-radius: 15px;
+    font-weight: bold;
+    border: 2px solid #333;
+    cursor: pointer;
+}
+.food { background: #ffaa00; }
+.play { background: #66cc66; }
+.dress { background: #66ccff; }
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\dress.css =====`n
+.subpage-container {
+    padding: 15px;
+    text-align: center;
+    background-color: #f0f7ff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.wardrobe-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+.item-card {
+    background: white;
+    border: 2px solid #66ccff;
+    border-radius: 10px;
+    padding: 10px;
+}
+.back-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\food.css =====`n
+.subpage-container {
+    padding: 15px;
+    text-align: center;
+    background-color: #fff9e6;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+.food-card {
+    background: white;
+    border: 2px solid #ffaa00;
+    border-radius: 10px;
+    padding: 12px;
+}
+.back-link {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 16px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\pachinko.css =====`n
+/* パチンコ画面 */
+.pachinko-section {
+    background: radial-gradient(circle, #001133, #000000);
+    flex-grow: 1;
+    border: 3px solid #cc0000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.jackpot-screen {
+    background: #111;
+    border: 2px solid #ffcc00;
+    text-align: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+}
+.jackpot-numbers {
+    color: #ff3333;
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 0 10px #ff0000;
+}
+.jackpot-text {
+    color: #ffcc00;
+    font-weight: bold;
+    margin: 5px 0;
+}
+.jackpot-details {
+    font-size: 0.8rem;
+    color: #add8e6;
+    margin: 0;
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\play.css =====`n
+.subpage-container {
+    padding: 15px;
+    text-align: center;
+    background-color: #eafbee;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.minigame-box {
+    background: white;
+    border: 2px solid #66cc66;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+.back-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\css\room.css =====`n
+/* 育成ルーム */
+.room-section {
+    background: #ffffff; /* または背景と同じ #a0d8ef */
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px; /* 一番上との隙間を少し整える */
+}
+.pet-name {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    position: absolute;
+    top: 5px;
+}
+.pet-character {
+    font-size: 2rem;
+    margin-top: 20px;
+}
+.stats-panel {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background: white;
+    border: 1px solid #333;
+    padding: 5px;
+    font-size: 0.7rem;
+    border-radius: 5px;
+}
+.stats-panel p {
+    margin: 2px 0;
+}
+.exp-bar {
+    display: inline-block;
+    width: 50px;
+    height: 8px;
+    background: #ccc;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+.exp-fill {
+    display: block;
+    width: 60%;
+    height: 100%;
+    background: #00cccc;
+    border-radius: 4px;
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\js\command.js =====`n
+// 育成コマンド用スクリプト
+document.addEventListener('DOMContentLoaded', () => {
+    // 画面遷移（<a>タグ）またはフォーム送信に任せるため、アラートは不要
+});
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\js\dress.js =====`n
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("おきがえ画面が読み込まれました");
+});
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\js\food.js =====`n
+document.addEventListener('DOMContentLoaded', function() {
+    var ballsDisplay = document.getElementById('balls-display');
+    var levelDisplay = document.getElementById('level-display');
+    var msgDisplay = document.getElementById('msg-display');
+
+    var forms = document.querySelectorAll('.care-form');
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // 画面遷移・JSON画面表示を絶対に防ぐ
+
+            var formData = new FormData(form);
+            var params = new URLSearchParams(formData);
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            })
+            .then(function(res) {
+                return res.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    if (ballsDisplay) ballsDisplay.textContent = data.balls + ' 発';
+                    if (levelDisplay) levelDisplay.textContent = 'LV: ' + data.level + ' (EXP: ' + data.exp + ' / ' + data.nextExp + ')';
+                    if (msgDisplay) msgDisplay.textContent = '';
+                } else {
+                    if (msgDisplay) msgDisplay.textContent = '玉が足りなくて買えないよ…！';
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+            });
+        });
+    });
+});
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\js\pachinko.js =====`n
+// パチンコ操作スクリプト
+function startGame() {
+    // フォーム送信による画面リロード（または非同期通信）に任せるため、アラートは不要
+}
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\js\play.js =====`n
+document.addEventListener('DOMContentLoaded', function() {
+    var ballsDisplay = document.getElementById('balls-display');
+    var levelDisplay = document.getElementById('level-display');
+    var msgDisplay = document.getElementById('msg-display');
+
+    var forms = document.querySelectorAll('.care-form');
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // 画面リロードを阻止
+
+            var formData = new FormData(form);
+            var params = new URLSearchParams(formData);
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            })
+            .then(function(res) {
+                return res.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    if (ballsDisplay) ballsDisplay.textContent = data.balls + ' 発';
+                    if (levelDisplay) levelDisplay.textContent = 'LV: ' + data.level + ' (EXP: ' + data.exp + ' / ' + data.nextExp + ')';
+                    if (msgDisplay) msgDisplay.textContent = '';
+                } else {
+                    if (msgDisplay) msgDisplay.textContent = '玉が足りなくてあそべないよ…！';
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+            });
+        });
+    });
+});
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\parts\command.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- 育成コマンド -->
+<section class="command-section">
+    <div class="section-label-small">育成コマンド</div>
+    <div class="command-buttons">
+        <a href="${pageContext.request.contextPath}/food" class="cmd-btn food" style="text-align:center; text-decoration:none; display:inline-block; line-height:35px;">ごはん</a>
+        <a href="${pageContext.request.contextPath}/play" class="cmd-btn play" style="text-align:center; text-decoration:none; display:inline-block; line-height:35px;">あそぶ</a>
+        <a href="${pageContext.request.contextPath}/dress" class="cmd-btn dress" style="text-align:center; text-decoration:none; display:inline-block; line-height:35px;">おきがえ</a>
+    </div>
+</section>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\parts\control.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- 操作パネル -->
+<section class="control-section">
+    <div class="status-bar">
+        <!-- ここが「54,320発」と直書きされていたら ${pet.balls}発 に変更するよ -->
+        <div class="ball-count">玉数 <span>${pet.balls}発</span></div>
+        <div class="toggles">
+            <label>玉を投入 <input type="checkbox"></label>
+            <label>オート <input type="checkbox" checked></label>
+        </div>
+    </div>
+    <form action="${pageContext.request.contextPath}/action" method="post">
+        <input type="hidden" name="action" value="pachinko">
+        <button type="submit" class="start-button">スタート！</button>
+    </form>
+</section>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\parts\footer.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- フッターナビゲーション -->
+<footer class="footer-nav">
+    <!-- そのうち作るかも -->
+</footer>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\parts\header.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- ヘッダー -->
+<header class="header">
+    <!-- そのうち作るかも -->
+</header>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\parts\pachinko.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- パチンコ画面 -->
+<section class="pachinko-section">
+    <div class="section-label">パチンコ画面</div>
+    <div class="machine-area">
+        <div class="jackpot-screen">
+            <h2 class="jackpot-numbers">${empty jackpotResult ? '7 7 7' : jackpotResult}</h2>
+            <p class="jackpot-text">${empty actionMessage ? '待機中' : actionMessage}</p>
+            <p class="jackpot-details">1回：10発消費</p>
+        </div>
+    </div>
+</section>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\parts\room.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!-- 育成ルーム -->
+<section class="room-section">
+    <div class="section-label">育成ルーム</div>
+    <div class="pet-name">${pet.name}</div>
+    <div class="pet-area">
+        <img src="${pageContext.request.contextPath}/images/pets/tamagoro/lv1.png"
+             alt="たまごろう"
+             style="max-width: 100px; height: auto; display: block; margin: 0 auto;">
+    </div>
+    <div class="stats-panel">
+        <p>LV: ${pet.level} <span class="exp-bar"><span class="exp-fill" style="width: ${pet.expPercent}%;"></span></span></p>
+        <p style="font-size:0.6rem; color:#666; margin:0;">EXP: ${pet.exp} / ${pet.nextLevelExp}</p>
+    </div>
+</section>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\dress.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>おきがえ - パチペット生活</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css">
+</head>
+<body>
+    <div class="app-container">
+        <jsp:include page="/WEB-INF/jsp/parts/header.jsp" />
+        <div class="subpage-container">
+            <h2>クローゼット</h2>
+            <p>${pet.name} のおきがえ</p>
+            <div class="wardrobe-list">
+                <div class="item-card"><p>ふつうの服</p><button disabled>着用中</button></div>
+                <div class="item-card"><p>パチンコ法被</p><button>着替える</button></div>
+            </div>
+            <div>
+                <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
+            </div>
+        </div>
+    </div>
+    <script src="${pageContext.request.contextPath}/js/dress.js"></script>
+</body>
+</html>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\food.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="model.PetCareLogic.CareItem" %>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ごはん - パチペット生活</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/food.css">
+</head>
+<body>
+    <div class="app-container">
+        <jsp:include page="/WEB-INF/jsp/parts/header.jsp" />
+        <div class="subpage-container" style="overflow-y: auto;">
+            <h2>ごはんをあげる</h2>
+            <p>所持玉数: <strong id="balls-display" style="color:#d9534f;">${pet.balls} 発</strong></p>
+            <p id="level-display">LV: ${pet.level} (EXP: ${pet.exp} / ${pet.nextLevelExp})</p>
+            <p id="msg-display" style="color:red; font-weight:bold; min-height:1.2em;"></p>
+
+            <div class="menu-grid">
+                <%
+                    CareItem[] items = (CareItem[]) request.getAttribute("items");
+                    if (items != null) {
+                        for (CareItem item : items) {
+                %>
+                    <form action="${pageContext.request.contextPath}/food" method="post" class="food-card care-form">
+                        <input type="hidden" name="itemId" value="<%= item.id() %>">
+                        <p style="font-weight:bold; margin:2px 0;"><%= item.name() %></p>
+                        <p style="font-size:0.75rem; color:#666; margin:2px 0;">
+                            消費玉: <%= item.cost() %> 発 / 獲得EXP: +<%= item.expGain() %>
+                        </p>
+                        <button type="submit" class="cmd-btn food" style="width:100%;">購入してたべさせる</button>
+                    </form>
+                <%
+                        }
+                    }
+                %>
+            </div>
+
+            <div style="margin: 15px 0;">
+                <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 確実に動くようにここに直接スクリプトを配置 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ballsDisplay = document.getElementById('balls-display');
+            var levelDisplay = document.getElementById('level-display');
+            var msgDisplay = document.getElementById('msg-display');
+
+            var forms = document.querySelectorAll('.care-form');
+            forms.forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // 画面遷移・リロードを完全阻止
+
+                    var formData = new FormData(form);
+                    var params = new URLSearchParams(formData);
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    })
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            if (ballsDisplay) ballsDisplay.textContent = data.balls + ' 発';
+                            if (levelDisplay) levelDisplay.textContent = 'LV: ' + data.level + ' (EXP: ' + data.exp + ' / ' + data.nextExp + ')';
+                            if (msgDisplay) msgDisplay.textContent = '';
+                        } else {
+                            if (msgDisplay) msgDisplay.textContent = '玉が足りなくて買えないよ…！';
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error(err);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\main.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玉の数だけ愛される？パチペット生活</title>
+    <!-- 分割したCSSを読み込み -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css">
+</head>
+<body>
+    <div class="app-container">
+    <%-- <jsp:include page="/WEB-INF/jsp/parts/header.jsp" /> --%>
+    <jsp:include page="/WEB-INF/jsp/parts/room.jsp" />
+    <jsp:include page="/WEB-INF/jsp/parts/pachinko.jsp" />
+    <jsp:include page="/WEB-INF/jsp/parts/control.jsp" />
+    <jsp:include page="/WEB-INF/jsp/parts/command.jsp" />
+    <%-- <jsp:include page="/WEB-INF/jsp/parts/footer.jsp" /> --%>
+</div>
+
+    <!-- 分割したJSを読み込み -->
+    <script src="${pageContext.request.contextPath}/js/pachinko.js"></script>
+    <script src="${pageContext.request.contextPath}/js/command.js"></script>
+</body>
+</html>
+`n===== C:\pleiades\workspace\パチンコ\src\main\webapp\WEB-INF\jsp\play.jsp =====`n
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="model.PetCareLogic.CareItem" %>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>あそぶ - パチペット生活</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/play.css">
+</head>
+<body>
+    <div class="app-container">
+        <jsp:include page="/WEB-INF/jsp/parts/header.jsp" />
+        <div class="subpage-container" style="overflow-y: auto;">
+            <h2>いっしょにあそぶ</h2>
+            <p>所持玉数: <strong id="balls-display" style="color:#d9534f;">${pet.balls} 発</strong></p>
+            <p id="level-display">LV: ${pet.level} (EXP: ${pet.exp} / ${pet.nextLevelExp})</p>
+            <p id="msg-display" style="color:red; font-weight:bold; min-height:1.2em;"></p>
+
+            <div class="menu-grid">
+                <%
+                    CareItem[] items = (CareItem[]) request.getAttribute("items");
+                    if (items != null) {
+                        for (CareItem item : items) {
+                %>
+                    <form action="${pageContext.request.contextPath}/play" method="post" class="food-card care-form" style="margin:5px 0; padding:10px;">
+                        <input type="hidden" name="itemId" value="<%= item.id() %>">
+                        <p style="font-weight:bold; margin:2px 0;"><%= item.name() %></p>
+                        <p style="font-size:0.75rem; color:#666; margin:2px 0;">
+                            消費玉: <%= item.cost() %> 発 / 獲得EXP: +<%= item.expGain() %>
+                        </p>
+                        <button type="submit" class="cmd-btn play" style="width:100%;">購入してあそぶ</button>
+                    </form>
+                <%
+                        }
+                    }
+                %>
+            </div>
+
+            <div style="margin: 15px 0;">
+                <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
+            </div>
+        </div>
+    </div>
+    <script src="${pageContext.request.contextPath}/js/play.js"></script>
+</body>
+</html>
+`n===== C:\pleiades\workspace\パチンコ\README.md =====`n
+# 開発・作業ガイド
+
+## 【重要】開発・ファイル操作ルール
+* **作業は必ず自分のブランチで行うこと**
+* **【厳禁】Windowsのエクスプローラーから直接ファイルを移動・名前変更・削除しないこと**
+  * EclipseのGitプラグイン（EGit）でリポジトリ管理・追跡を行っているため、エクスプローラーから直接触るとEclipse側の表示と実ファイルがズレ（未同期）、パッケージ宣言やimportの更新漏れ、Git管理情報の不整合が発生し、復旧が困難になります。
+  * ファイルの追加・移動・名前変更・削除は、**必ずEclipseのパッケージ・エクスプローラー上から**行ってください。
+* **【厳禁】外部ライブラリ（.jarファイルなど）の無断追加の禁止**
+  * プロジェクトは**追加ファイルなし（JDK標準機能および標準のServlet/JSP APIのみ）で動作する構成を厳守**してください。
+  * 個人で勝手にJARを追加すると、ビルドパス（.classpath）の破損や環境差異による動作不良の原因になります。
+  * どうしても追加のライブラリやJARを使いたい場合は、**勝手に追加せず、必ず事前にチームメンバーへ相談**してください。
+* **【厳禁】次のファイルは編集しないこと**
+  * `.classpath` / `.project` / `.gitignore` / `web.xml`
+  * 変更が必要な場合は、勝手に直さず事前に相談してください。
+* **【厳禁】プロジェクト名（`パチンコ`）を変更しないこと**
+  * プロジェクト名がそのままURLの一部（`/パチンコ/`）になっているため、変更すると動作確認URLが変わり、全員の環境がズレます。
+* **ファイルの文字コードはUTF-8のまま変更しないこと**（Eclipseの設定を変えない）
+
+---
+
+## 動作環境（全員これで統一）
+* Eclipse：配布したものをそのまま使用（バージョンのアップデートや設定の変更はしない）
+* サーバー：**Tomcat10_Java21 のみ使用**
+  * 他のサーバー構成や他のJavaで起きた不具合は保証の対象外です。
+  * サーバー定義を追加・変更しないでください。
+
+---
+
+## アクセスURL
+* 動作確認URL:
+  http://localhost:8080/パチンコ/main?reset=true
+  * `?reset=true` を付けると、ゲームの状態（玉数・レベル）が初期状態に戻ります。
+* 正常に動いている状態の目安:
+  * 育成ルーム（たまごろう）、パチンコ画面、「スタート！」ボタン、育成コマンド（ごはん／あそぶ／おきがえ）が表示される。
+  * 「スタート！」を押すと玉が10発減る（当たれば増える）。
+
+---
+
+## ブランチと反映の流れ
+1. 作業は自分のブランチで行う。
+2. 作業を始める前に、最新のmasterを自分のブランチにマージする。
+3. マージやpullの前に、**必ず自分の変更をコミットしておく**（未コミットのままだとEGitでエラーになります）。
+4. 自分のブランチにpushする。masterへの反映はリーダーが行う。
+* ブランチの最新化と動作確認は**各自の責任**で行う（リーダーは確認しません）。失敗したら自分のブランチを巻き戻して、もう一度やり直す。
+
+---
+
+## 動かないとき・おかしいときの確認順
+上から順に試してください。**それでも直らなければ、下の手順でAIに質問してください。**
+
+1. 自分のブランチに最新のmasterをマージしたか
+2. Eclipseのメニュー「プロジェクト」→「クリーン」を実行する
+3. 「サーバー」ビューで Tomcat10_Java21 を選び、右クリック→「クリーン…」を実行してから再起動する
+4. ブラウザで動作確認URL（`?reset=true` 付き）を開き直す
+5. エラーが出ているなら、エラーメッセージ（コンソールの赤い文字）を**全文**コピーしておく
+
+---
+
+## AIにプロジェクト全体を共有する方法
+※ 日本語コメント等は文字化けする場合がありますが、コードの構造把握用として使用できます。
+
+1. コマンドプロンプト（cmd）を開き、プロジェクトのルートディレクトリで以下を実行：
+```bat
+   powershell -c "gci -r -inc *.java,*.jsp,*.js,*.css,README.md|%{'`n===== '+$_.FullName+' =====`n';gc -Encoding UTF8 $_}|Out-File -Encoding utf8 all.txt"
+```
+2. 生成された `all.txt` をそのままAIにdropする。
+3. 質問するときは、次のものを**一緒に**渡す：
+   * 何をしようとして、どうなったか
+   * エラーメッセージの全文
+   * 画面の問題なら、ブラウザの画面のスクリーンショット
+   * 画像（`images` フォルダ）、サーバー設定、ビルドパスの問題は `all.txt` に含まれないため、必要ならスクリーンショットで渡す
+4. 要件が済んだら必ず `all.txt` を削除し、**そのままコミット・プッシュしないこと**。
