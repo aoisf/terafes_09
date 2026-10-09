@@ -21,6 +21,10 @@ public class PlayServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        if (session.getAttribute("pet") == null) {
+            session.setAttribute("pet", new Pet());
+        }
         request.setAttribute("items", PetCareLogic.PLAY_ITEMS);
         request.getRequestDispatcher("/WEB-INF/jsp/play.jsp").forward(request, response);
     }
@@ -33,34 +37,41 @@ public class PlayServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         Pet pet = (Pet) session.getAttribute("pet");
+        if (pet == null) {
+            pet = new Pet();
+            session.setAttribute("pet", pet);
+        }
 
         boolean success = false;
-        if (pet != null) {
-            synchronized (pet) {
-                if (pet.getBalls().signum() > 0) {
-                    session.removeAttribute("rescueClaimed");
-                }
-                String itemId = request.getParameter("itemId");
-                BigInteger count = BigInteger.ONE;
-                try {
-                    String countParam = request.getParameter("count");
-                    if (countParam != null && !countParam.isEmpty()) {
-                        count = new BigInteger(countParam);
-                    }
-                } catch (Exception e) {
-                    count = BigInteger.ONE;
-                }
-                success = petCareLogic.play(pet, itemId, count);
+        boolean invalidCount = false;
+        String balls;
+        int level;
+        String exp;
+        String nextExp;
+        String itemId = request.getParameter("itemId");
+        BigInteger count = BigInteger.ONE;
+        String countParam = request.getParameter("count");
+        try {
+            if (countParam != null) count = new BigInteger(countParam);
+        } catch (NumberFormatException e) {
+            invalidCount = true;
+        }
+        synchronized (pet) {
+            if (pet.getBalls().signum() > 0) {
+                session.removeAttribute("rescueClaimed");
             }
+            if (!invalidCount) success = petCareLogic.play(pet, itemId, count);
+            balls = pet.getBalls().toString();
+            level = pet.getLevel();
+            exp = pet.getExp().toString();
+            nextExp = pet.getNextLevelExp().toString();
         }
 
         String json = String.format(
-            "{\"success\": %b, \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
+            "{\"success\": %b, \"error\": \"%s\", \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
             success,
-            pet != null ? pet.getBalls().toString() : "0",
-            pet != null ? pet.getLevel() : 1,
-            pet != null ? pet.getExp().toString() : "0",
-            pet != null ? pet.getNextLevelExp().toString() : "2"
+            invalidCount ? "invalid_count" : success ? "" : "insufficient_balls_or_invalid_item",
+            balls, level, exp, nextExp
         );
         response.getWriter().write(json);
     }

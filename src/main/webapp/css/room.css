@@ -26,6 +26,13 @@
     margin: 10px 0;
 }
 
+.pet-image {
+    display: block;
+    width: min(100px, 32vw);
+    height: auto;
+    margin: 0 auto;
+}
+
 .stats-panel {
     position: absolute;
     bottom: 10px;
@@ -40,6 +47,14 @@
 
 .stats-panel p {
     margin: 2px 0;
+}
+
+.stats-panel .pet-exp {
+    max-width: 100%;
+    margin: 0;
+    color: #666;
+    font-size: 0.6rem;
+    overflow-wrap: anywhere;
 }
 
 .exp-bar {
@@ -58,4 +73,27 @@
     height: 100%;
     background: #00cccc;
     border-radius: 5px;
+}
+
+@media (max-width: 380px) {
+    .room-section {
+        min-height: 200px;
+        padding: 32px 12px 12px;
+    }
+
+    .pet-area {
+        margin: 0;
+    }
+
+    .stats-panel {
+        position: static;
+        align-self: stretch;
+        max-width: 100%;
+        margin-top: 6px;
+        text-align: center;
+    }
+
+    .stats-panel .pet-exp {
+        font-size: 0.7rem;
+    }
 }

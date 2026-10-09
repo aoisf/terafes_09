@@ -4,15 +4,20 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>あそぶ - パチペット生活</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/play.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/play.css?v=1">
 </head>
 <body>
-    <div class="app-container page-play">
+    <div class="app-container page-play care-page"
+         data-endpoint="${pageContext.request.contextPath}/play"
+         data-count-unit="回" data-balls="${pet.balls}" data-level="${pet.level}"
+         data-exp="${pet.exp}" data-next-exp="${pet.nextLevelExp}">
         <h2 class="subpage-title">いっしょにあそぶ</h2>
-        <div class="status-summary">
-            <p>所持玉数: <strong id="balls-display" style="color:#d9534f; font-size:1.2rem;">${pet.balls} 発</strong></p>
+        <div class="status-summary" id="care-status">
+            <p>所持玉数: <strong id="balls-display" class="formatted-number">${pet.balls} 発</strong></p>
             <p id="level-display">LV: ${pet.level} (EXP: ${pet.exp} / ${pet.nextLevelExp})</p>
         </div>
 
@@ -22,19 +27,19 @@
                 if (items != null) {
                     for (CareItem item : items) {
             %>
-                <div class="play-card" data-cost="<%= item.cost().toString() %>" data-id="<%= item.id() %>">
+                <div class="care-card play-card" data-cost="<%= item.cost().toString() %>" data-id="<%= item.id() %>">
                     <div class="item-info">
                         <span class="item-name"><%= item.name() %></span>
-                        <span class="item-meta">1回消費: <%= item.cost() %> 発 / 獲得EXP: +<%= item.expGain() %></span>
+                        <span class="item-meta">1回消費: <%= String.format(java.util.Locale.JAPAN, "%,d", item.cost()) %> 発 / 獲得EXP: +<%= String.format(java.util.Locale.JAPAN, "%,d", item.expGain()) %></span>
                     </div>
                     <div class="action-box">
                         <span class="affordable-count">あそべる数: <strong class="count-val">0</strong></span>
                         <div class="buy-buttons">
-                            <button type="button" class="btn-play" data-count="1">1回</button>
-                            <button type="button" class="btn-play" data-count="10">10回</button>
-                            <button type="button" class="btn-play" data-count="100">100回</button>
-                            <button type="button" class="btn-play" data-count="1000">1000回</button>
-                            <button type="button" class="btn-play btn-max" data-count="max">MAX</button>
+                            <button type="button" class="btn-care btn-play" data-count="1">1回</button>
+                            <button type="button" class="btn-care btn-play" data-count="10">10回</button>
+                            <button type="button" class="btn-care btn-play" data-count="100">100回</button>
+                            <button type="button" class="btn-care btn-play" data-count="1000">1000回</button>
+                            <button type="button" class="btn-care btn-play btn-max" data-count="max">MAX</button>
                         </div>
                     </div>
                 </div>
@@ -49,109 +54,6 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var ballsDisplay = document.getElementById('balls-display');
-            var levelDisplay = document.getElementById('level-display');
-            var cards = document.querySelectorAll('.play-card');
-
-            var currentBalls = BigInt("${pet.balls}");
-
-            function updateAffordableCounts() {
-                cards.forEach(function(card) {
-                    var cost = BigInt(card.getAttribute('data-cost'));
-                    var countVal = card.querySelector('.count-val');
-                    var buttons = card.querySelectorAll('.btn-play');
-
-                    var maxAffordable = currentBalls / cost;
-                    card.setAttribute('data-max', maxAffordable.toString());
-                    countVal.textContent = maxAffordable.toLocaleString() + '回';
-
-                    buttons.forEach(function(b) {
-                        var target = b.getAttribute('data-count');
-                        if (target === 'max') {
-                            if (maxAffordable <= 0n) {
-                                b.classList.add('disabled');
-                            } else {
-                                b.classList.remove('disabled');
-                            }
-                        } else {
-                            var needed = BigInt(target);
-                            if (maxAffordable < needed) {
-                                b.classList.add('disabled');
-                            } else {
-                                b.classList.remove('disabled');
-                            }
-                        }
-                    });
-                });
-            }
-
-            function showBubble(targetBtn, text) {
-                var parent = targetBtn.closest('.action-box');
-                var existing = parent.querySelector('.bubble-popup');
-                if (existing) existing.remove();
-
-                var bubble = document.createElement('div');
-                bubble.className = 'bubble-popup';
-                bubble.textContent = text;
-                parent.appendChild(bubble);
-
-                setTimeout(function() {
-                    bubble.classList.add('fade-out');
-                    setTimeout(function() { bubble.remove(); }, 300);
-                }, 1800);
-            }
-
-            updateAffordableCounts();
-
-            cards.forEach(function(card) {
-                var itemId = card.getAttribute('data-id');
-                var cost = BigInt(card.getAttribute('data-cost'));
-
-                card.querySelectorAll('.btn-play').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var targetCount = btn.getAttribute('data-count');
-                        var count = 0n;
-
-                        if (targetCount === 'max') {
-                            count = currentBalls / cost;
-                        } else {
-                            count = BigInt(targetCount);
-                        }
-
-                        if (count <= 0n || currentBalls < (cost * count)) {
-                            showBubble(btn, '玉が足りないよ！');
-                            return;
-                        }
-
-                        var params = new URLSearchParams();
-                        params.append('itemId', itemId);
-                        params.append('count', count.toString());
-
-                        fetch('${pageContext.request.contextPath}/play', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: params.toString()
-                        })
-                        .then(function(res) { return res.json(); })
-                        .then(function(data) {
-                            if (data.success) {
-                                currentBalls = BigInt(data.balls);
-                                if (ballsDisplay) ballsDisplay.textContent = data.balls + ' 発';
-                                if (levelDisplay) levelDisplay.textContent = 'LV: ' + data.level + ' (EXP: ' + data.exp + ' / ' + data.nextExp + ')';
-                                updateAffordableCounts();
-                            } else {
-                                showBubble(btn, '玉が足りないよ！');
-                            }
-                        })
-                        .catch(function(err) {
-                            console.error(err);
-                        });
-                    });
-                });
-            });
-        });
-    </script>
+    <script src="${pageContext.request.contextPath}/js/care.js?v=1" defer></script>
 </body>
 </html>

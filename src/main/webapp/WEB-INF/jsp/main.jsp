@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>玉の数だけ愛される？パチペット生活</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=6">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=7">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=2">
 </head>
 <body>
     <!-- メイン画面コンテナ -->
@@ -33,7 +33,7 @@
 
             String formattedMsg = actionMsg;
             if (isHit) {
-                formattedMsg = actionMsg.replaceAll("(\\d+発)", "<span class=\"rainbow-text\">$1</span>");
+                formattedMsg = actionMsg.replaceAll("([\\d,]+発)", "<span class=\"rainbow-text\">$1</span>");
             }
     %>
         <div id="result-toast" class="pachinko-result-toast <%= isHit ? "hit" : "miss" %>">
@@ -62,8 +62,7 @@
         }
     %>
 
-    <script src="${pageContext.request.contextPath}/js/pachinko.js?v=5"></script>
-    <script src="${pageContext.request.contextPath}/js/command.js"></script>
-    <script src="${pageContext.request.contextPath}/js/rescue.js"></script>
+    <script src="${pageContext.request.contextPath}/js/pachinko.js?v=6"></script>
+    <script src="${pageContext.request.contextPath}/js/rescue.js?v=2"></script>
 </body>
 </html>

@@ -13,13 +13,12 @@ function checkZeroBalls(ballsVal) {
     try {
         var cleaned = String(ballsVal).replace(/[^0-9]/g, '');
         // 文字列が空でなく、すべて0（または数値変換して0）の場合
-        if (cleaned !== '' && /^0+$/.test(cleaned)) {
-            rescueModal.style.setProperty('display', 'flex', 'important');
-        } else {
-            rescueModal.style.setProperty('display', 'none', 'important');
-        }
+        var isEmpty = cleaned !== '' && /^0+$/.test(cleaned);
+        rescueModal.classList.toggle('is-open', isEmpty);
+        rescueModal.setAttribute('aria-hidden', String(!isEmpty));
     } catch (e) {
-        rescueModal.style.setProperty('display', 'none', 'important');
+        rescueModal.classList.remove('is-open');
+        rescueModal.setAttribute('aria-hidden', 'true');
     }
 }
 
@@ -275,7 +274,7 @@ function finishRescue(type) {
         if (!data.success) {
             cancelRescueGame();
             checkZeroBalls(data.balls);
-            if (rescueModal && rescueModal.style.display !== 'none') {
+            if (rescueModal && rescueModal.classList.contains('is-open')) {
                 rescueGameArea.style.display = 'block';
                 rescueMenu.style.display = 'none';
                 gameTitle.textContent = '救済を利用できません。玉数を確認してください。';
@@ -284,7 +283,10 @@ function finishRescue(type) {
         }
 
         cancelRescueGame();
-        if (rescueModal) rescueModal.style.setProperty('display', 'none', 'important');
+        if (rescueModal) {
+            rescueModal.classList.remove('is-open');
+            rescueModal.setAttribute('aria-hidden', 'true');
+        }
 
         var bElem = document.getElementById('main-ball-count');
         if (bElem) {

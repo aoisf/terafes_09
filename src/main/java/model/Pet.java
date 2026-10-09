@@ -38,8 +38,9 @@ public class Pet implements Serializable {
     // ゲージ表示用の進捗パーセント (0 - 100)
     public int getExpPercent() {
         if (this.level >= 100) return 100;
+        if (this.level < 1) return 0;
         BigInteger next = getNextLevelExp();
         if (next.equals(BigInteger.ZERO)) return 0;
-        return this.exp.multiply(BigInteger.valueOf(100)).divide(next).intValue();
+        return Math.min(100, this.exp.multiply(BigInteger.valueOf(100)).divide(next).intValue());
     }
 }

@@ -64,10 +64,15 @@ public class GameActionServlet extends HttpServlet {
             String json = String.format(
                 "{\"success\": %b, \"balls\": \"%s\", \"reward\": %d}",
                 success,
-                pet.getBalls().toString(),
+                getBallsSnapshot(pet).toString(),
                 success ? reward : 0
             );
             response.getWriter().write(json);
+            return;
+        }
+
+        if (!"pachinko".equals(action)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unsupported action");
             return;
         }
 
@@ -89,7 +94,8 @@ public class GameActionServlet extends HttpServlet {
                             pet.getLevel(), SLOT_BASE_PAYOUTS[result]
                         );
                         petCareLogic.handlePachinkoHit(pet, payout);
-                        message = "大当り！「" + slotSymbol + "」が3つ揃い！ " + payout + "発 獲得！";
+                        message = "大当り！「" + slotSymbol + "」が3つ揃い！ "
+                                + String.format(java.util.Locale.JAPAN, "%,d", payout) + "発 獲得！";
                     } else {
                         message = "ハズレ… 10発消費";
                     }
@@ -107,9 +113,9 @@ public class GameActionServlet extends HttpServlet {
                 "{\"canPlay\": %b, \"hit\": %b, \"symbol\": \"%s\", \"message\": \"%s\", \"balls\": \"%s\"}",
                 canPlay,
                 isHit,
-                slotSymbol,
-                message,
-                pet.getBalls().toString()
+                escapeJson(slotSymbol),
+                escapeJson(message),
+                getBallsSnapshot(pet).toString()
             );
             response.getWriter().write(json);
             return;
@@ -118,5 +124,16 @@ public class GameActionServlet extends HttpServlet {
         // 通常のフォーム送信の場合はリダイレクト
         session.setAttribute("actionMessage", message);
         response.sendRedirect(request.getContextPath() + "/main");
+    }
+
+    private BigInteger getBallsSnapshot(Pet pet) {
+        synchronized (pet) {
+            return pet.getBalls();
+        }
+    }
+
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r");
     }
 }

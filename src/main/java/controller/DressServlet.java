@@ -7,6 +7,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import model.Pet;
 
 @WebServlet("/dress")
 public class DressServlet extends HttpServlet {
@@ -15,6 +18,10 @@ public class DressServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        if (session.getAttribute("pet") == null) {
+            session.setAttribute("pet", new Pet());
+        }
         request.getRequestDispatcher("/WEB-INF/jsp/dress.jsp").forward(request, response);
     }
 }

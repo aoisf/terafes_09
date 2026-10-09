@@ -102,6 +102,7 @@ public class PetCareLogic {
 
     // 経験値加算とレベルアップ計算
     public void addExp(Pet pet, BigInteger gain) {
+        if (pet == null || gain == null || gain.signum() <= 0) return;
         if (pet.getLevel() >= MAX_LEVEL) {
             pet.setLevel(MAX_LEVEL);
             pet.setExp(BigInteger.ZERO);
@@ -132,6 +133,7 @@ public class PetCareLogic {
 
     // 玉消費 (BigInteger対応)
     public boolean consumeBalls(Pet pet, BigInteger amount) {
+        if (pet == null || pet.getBalls() == null || amount == null || amount.signum() <= 0) return false;
         if (pet.getBalls().compareTo(amount) >= 0) {
             pet.setBalls(pet.getBalls().subtract(amount));
             return true;
@@ -145,6 +147,7 @@ public class PetCareLogic {
 
     // パチンコ当たり加算
     public void handlePachinkoHit(Pet pet, BigInteger payout) {
+        if (pet == null || pet.getBalls() == null || payout == null || payout.signum() <= 0) return;
         pet.setBalls(pet.getBalls().add(payout));
     }
 

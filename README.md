@@ -46,7 +46,20 @@
 
   * 他のサーバー構成や他のJavaで起きた不具合は保証の対象外です。
 
-  * サーバー定義を追加・変更しないでください。
+* サーバー定義を追加・変更しないでください。
+
+
+## アプリのファイル構成
+
+* `src/main/java/controller/`: URLごとの画面表示と操作受付（Servlet）
+* `src/main/java/model/`: ペットの状態と育成・玉数計算
+* `src/main/webapp/WEB-INF/jsp/`: 画面。`parts/` はメイン画面で使う部品
+* `src/main/webapp/css/`: 共通CSS、サブ画面共通CSS、画面ごとの色や装飾
+* `src/main/webapp/js/`: `control.js` はメイン操作、`care.js` はごはん・あそぶ共通操作、`pachinko.js` と `rescue.js` は演出・救済操作
+* `src/main/webapp/images/`: キャラクターなどの画像素材
+* `build/`: Eclipseのコンパイル結果や一時ファイル。Gitには含めない
+
+JSPは `WEB-INF` 配下に置き、画面のURLは対応するServletから転送します。画面操作のJavaScriptは `js/` に置き、JSPへ長いスクリプトを直接埋め込まないようにします。
 
 
 
@@ -124,9 +137,9 @@
 
    * プロジェクト直下にあるバッチファイル（export_all.bat）をダブルクリックして実行する。
 
-   * プロジェクト直下に all.txt が自動生成されます。
+   * build フォルダ内に all.txt が自動生成されます。
 
-2. 生成された all.txt をAIにドラッグ＆ドロップする。
+2. 生成された build/all.txt をAIにドラッグ＆ドロップする。
 
 3. 質問するときは、次の情報を一緒に添えて送る：
 
@@ -138,4 +151,4 @@
 
    * ※ 画像ファイル（images フォルダ）、サーバー定義、ビルドパス設定は all.txt に含まれないため、該当箇所のスクリーンショットを添付する
 
-4. 【重要】相談が終わったら必ず all.txt を削除し、Gitにコミット・プッシュしないこと。
+4. 【重要】all.txt は build フォルダ内に生成されるため、Git管理されません。不要になったら削除してください。

@@ -36,6 +36,10 @@
     cursor: pointer;
 }
 
+.auto-toggle-label {
+    user-select: none;
+}
+
 .start-button {
     width: 100%;
     background: linear-gradient(to bottom, #ff6666, #cc0000);
@@ -53,6 +57,11 @@
 .start-button:active {
     transform: translateY(4px);
     box-shadow: none;
+}
+
+.start-button.is-auto-running {
+    background: linear-gradient(to bottom, #777, #333);
+    box-shadow: 0 4px 0 #111;
 }
 
 /* 育成コマンド */

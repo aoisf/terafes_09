@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>おきがえ - パチペット生活</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css?v=2">
 </head>
 <body>
     <div class="app-container page-dress">
@@ -19,7 +19,7 @@
             </div>
             <div class="item-card">
                 <p class="wardrobe-name">パチンコ法被</p>
-                <button class="cmd-btn dress-btn">着替える</button>
+                <button class="cmd-btn dress-btn" disabled>あとで追加</button>
             </div>
         </div>
 
@@ -27,6 +27,5 @@
             <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
         </div>
     </div>
-    <script src="${pageContext.request.contextPath}/js/dress.js"></script>
 </body>
 </html>
