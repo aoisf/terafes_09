@@ -1,6 +1,10 @@
 /* 育成ルーム */
 .room-section {
-    background: #f7fbfc;
+    isolation: isolate;
+    background-color: #e9f1e7;
+    background-image: linear-gradient(rgba(245, 249, 248, .25), rgba(245, 249, 248, .25)), var(--room-background-image);
+    background-position: center;
+    background-size: cover;
     min-height: 160px;
     display: flex;
     flex-direction: column;
@@ -8,6 +12,15 @@
     align-items: center;
     position: relative;
     padding: 15px;
+}
+
+.room-section::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(255,255,255,.3), transparent 26%, transparent 74%, rgba(255,255,255,.3));
+    content: "";
+    pointer-events: none;
 }
 
 .pet-name {

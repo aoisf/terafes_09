@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import model.Pet;
+import model.PlayRecord;
 
 @WebServlet("/main")
 public class MainServlet extends HttpServlet {
@@ -35,6 +36,10 @@ public class MainServlet extends HttpServlet {
         if (pet == null) {
             pet = new Pet();
             session.setAttribute("pet", pet);
+        }
+
+        if (session.getAttribute("playRecord") == null) {
+            session.setAttribute("playRecord", new PlayRecord());
         }
 
         request.getRequestDispatcher("/WEB-INF/jsp/main.jsp").forward(request, response);

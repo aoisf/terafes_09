@@ -54,9 +54,11 @@
 * `src/main/java/controller/`: URLごとの画面表示と操作受付（Servlet）
 * `src/main/java/model/`: ペットの状態と育成・玉数計算
 * `src/main/webapp/WEB-INF/jsp/`: 画面。`parts/` はメイン画面で使う部品
-* `src/main/webapp/css/`: 共通CSS、サブ画面共通CSS、画面ごとの色や装飾
-* `src/main/webapp/js/`: `control.js` はメイン操作、`care.js` はごはん・あそぶ共通操作、`pachinko.js` と `rescue.js` は演出・救済操作
-* `src/main/webapp/images/`: キャラクターなどの画像素材
+* `src/main/webapp/css/`: 共通CSS、サブ画面共通CSS、画面ごとの色や装飾。`dashboard.css` はメイン画面のヘッダーとポップアップ
+* `src/main/webapp/js/`: `control.js` はメイン操作、`care.js` はごはん・あそぶ共通操作、`pachinko.js` と `rescue.js` は演出・救済操作、`dashboard.js` は図鑑・設定・記録・実績の操作
+* `src/main/java/model/PlayRecord.java`: 展示中の操作記録、実績状態、選択中の育成ルーム背景をセッション内で保持
+* `src/main/java/controller/BackgroundServlet.java`: 100回操作達成後の育成ルーム背景変更
+* `src/main/webapp/images/`: キャラクター、育成コマンド、育成ルーム（部屋・森）の背景画像
 * `build/`: Eclipseのコンパイル結果や一時ファイル。Gitには含めない
 
 JSPは `WEB-INF` 配下に置き、画面のURLは対応するServletから転送します。画面操作のJavaScriptは `js/` に置き、JSPへ長いスクリプトを直接埋め込まないようにします。

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 import model.Pet;
 import model.PetCareLogic;
+import model.PlayRecord;
 
 @WebServlet("/food")
 public class FoodServlet extends HttpServlet {
@@ -24,6 +25,10 @@ public class FoodServlet extends HttpServlet {
 
     protected boolean applyCare(Pet pet, String itemId, BigInteger count) {
         return petCareLogic.feed(pet, itemId, count);
+    }
+
+    protected boolean isFoodAction() {
+        return true;
     }
 
     protected String getCarePage() {
@@ -54,12 +59,19 @@ public class FoodServlet extends HttpServlet {
             session.setAttribute("pet", pet);
         }
 
+        PlayRecord playRecord = (PlayRecord) session.getAttribute("playRecord");
+        if (playRecord == null) {
+            playRecord = new PlayRecord();
+            session.setAttribute("playRecord", playRecord);
+        }
+
         boolean success = false;
         boolean invalidCount = false;
         String balls;
         int level;
         String exp;
         String nextExp;
+        String recordJson;
         String itemId = request.getParameter("itemId");
         BigInteger count = BigInteger.ONE;
         String countParam = request.getParameter("count");
@@ -73,17 +85,19 @@ public class FoodServlet extends HttpServlet {
                 session.removeAttribute("rescueClaimed");
             }
             if (!invalidCount) success = applyCare(pet, itemId, count);
+            if (success) playRecord.recordCare(isFoodAction());
             balls = pet.getBalls().toString();
             level = pet.getLevel();
             exp = pet.getExp().toString();
             nextExp = pet.getNextLevelExp().toString();
+            recordJson = playRecord.toJson();
         }
 
         String json = String.format(
-            "{\"success\": %b, \"error\": \"%s\", \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\"}",
+            "{\"success\": %b, \"error\": \"%s\", \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\", \"record\": %s}",
             success,
             invalidCount ? "invalid_count" : success ? "" : "insufficient_balls_or_invalid_item",
-            balls, level, exp, nextExp
+            balls, level, exp, nextExp, recordJson
         );
         response.getWriter().write(json);
     }

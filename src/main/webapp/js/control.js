@@ -43,9 +43,8 @@ document.addEventListener('DOMContentLoaded', function() {
             window.setTimeout(function() { serverToast.remove(); }, 400);
         }, toastDuration);
     }
-    if (typeof setPachinkoAutoMode === 'function') {
-        setPachinkoAutoMode(autoToggle.checked);
-    }
+    // オート設定は初期選択だけに使い、レバーを操作するまでは回転させない。
+    if (typeof setPachinkoAutoMode === 'function') setPachinkoAutoMode(false);
 
     function showToast(message, isHit) {
         var existing = document.getElementById('result-toast');
@@ -116,6 +115,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(function(data) {
             if (data.balls != null) updateBalls(data.balls, requestSequence);
+            if (data.record && typeof window.updateDashboardRecord === 'function') {
+                window.updateDashboardRecord(data.record);
+            }
             if (!data.canPlay) {
                 finishRequest('empty', function() {
                     if (autoRequest) {

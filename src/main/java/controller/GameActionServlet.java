@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 
 import model.Pet;
 import model.PetCareLogic;
+import model.PlayRecord;
 
 @WebServlet("/action")
 public class GameActionServlet extends HttpServlet {
@@ -34,6 +35,12 @@ public class GameActionServlet extends HttpServlet {
         if (pet == null) {
             pet = new Pet();
             session.setAttribute("pet", pet);
+        }
+
+        PlayRecord playRecord = (PlayRecord) session.getAttribute("playRecord");
+        if (playRecord == null) {
+            playRecord = new PlayRecord();
+            session.setAttribute("playRecord", playRecord);
         }
 
         String action = request.getParameter("action");
@@ -99,6 +106,7 @@ public class GameActionServlet extends HttpServlet {
                     } else {
                         message = "ハズレ… 10発消費";
                     }
+                    playRecord.recordPachinko(isHit);
                 } else {
                     message = "玉が足りません！";
                 }
@@ -110,12 +118,13 @@ public class GameActionServlet extends HttpServlet {
         if (accept != null && accept.contains("application/json")) {
             response.setContentType("application/json; charset=UTF-8");
             String json = String.format(
-                "{\"canPlay\": %b, \"hit\": %b, \"symbol\": \"%s\", \"message\": \"%s\", \"balls\": \"%s\"}",
+                "{\"canPlay\": %b, \"hit\": %b, \"symbol\": \"%s\", \"message\": \"%s\", \"balls\": \"%s\", \"record\": %s}",
                 canPlay,
                 isHit,
                 escapeJson(slotSymbol),
                 escapeJson(message),
-                getBallsSnapshot(pet).toString()
+                getBallsSnapshot(pet).toString(),
+                playRecord.toJson()
             );
             response.getWriter().write(json);
             return;

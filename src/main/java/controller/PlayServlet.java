@@ -25,4 +25,9 @@ public class PlayServlet extends FoodServlet {
     protected boolean applyCare(Pet pet, String itemId, BigInteger count) {
         return petCareLogic.play(pet, itemId, count);
     }
+
+    @Override
+    protected boolean isFoodAction() {
+        return false;
+    }
 }

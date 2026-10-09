@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!-- 育成ルーム -->
-<section class="room-section">
+<section class="room-section"
+         style="--room-background-image: url('${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/${playRecord.selectedBackground}.png')">
     <div class="section-label">育成ルーム</div>
     <div class="pet-name">${pet.name}</div>
     <div class="pet-area">

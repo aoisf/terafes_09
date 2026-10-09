@@ -87,6 +87,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         showBubble(button, data.error === 'invalid_count' ? '個数を確認してね！' : '玉が足りないよ！');
                         return;
                     }
+                    if (data.record && typeof window.updateDashboardRecord === 'function') {
+                        window.updateDashboardRecord(data.record);
+                    }
                     currentBalls = BigInt(data.balls);
                     renderStatus(data.level, data.exp, data.nextExp);
                 })

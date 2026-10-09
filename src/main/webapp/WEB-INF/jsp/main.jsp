@@ -7,14 +7,16 @@
     <title>玉の数だけ愛される？パチペット生活</title>
     <!-- 分割したCSSを読み込み -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=18">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=10">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=6">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css?v=2">
 </head>
 <body>
     <!-- メイン画面コンテナ -->
     <div class="app-container">
+        <jsp:include page="/WEB-INF/jsp/parts/dashboard.jsp" />
         <jsp:include page="/WEB-INF/jsp/parts/room.jsp" />
         <jsp:include page="/WEB-INF/jsp/parts/pachinko.jsp" />
         <jsp:include page="/WEB-INF/jsp/parts/control.jsp" />
@@ -50,5 +52,6 @@
 
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=8"></script>
     <script src="${pageContext.request.contextPath}/js/rescue.js?v=6"></script>
+    <script src="${pageContext.request.contextPath}/js/dashboard.js?v=3" defer></script>
 </body>
 </html>
