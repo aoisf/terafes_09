@@ -9,7 +9,7 @@
              class="pet-image">
     </div>
     <div class="stats-panel">
-        <p>LV: ${pet.level} <span class="exp-bar"><span class="exp-fill" style="width: ${pet.expPercent}%;"></span></span></p>
+        <p>LV: ${pet.level} <span class="exp-bar"><span class="exp-fill" data-percent="${pet.expPercent}"></span></span></p>
         <p class="pet-exp">EXP: <span id="current-exp" data-value="${pet.exp}">${pet.exp}</span>
             / <span id="next-exp" data-value="${pet.nextLevelExp}">${pet.nextLevelExp}</span></p>
     </div>

@@ -17,6 +17,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.pet-exp [data-value]').forEach(function(value) {
         value.textContent = BigInt(value.getAttribute('data-value')).toLocaleString();
     });
+    document.querySelectorAll('.exp-fill[data-percent]').forEach(function(fill) {
+        var percent = Number(fill.getAttribute('data-percent'));
+        fill.style.width = Math.max(0, Math.min(100, percent)) + '%';
+    });
+    var serverToast = document.getElementById('result-toast');
+    if (serverToast) {
+        requestAnimationFrame(function() { serverToast.classList.add('show'); });
+        var toastDuration = Number(serverToast.getAttribute('data-duration')) || 2200;
+        window.setTimeout(function() {
+            serverToast.classList.remove('show');
+            window.setTimeout(function() { serverToast.remove(); }, 400);
+        }, toastDuration);
+    }
     if (typeof setPachinkoAutoMode === 'function') {
         setPachinkoAutoMode(autoToggle.checked);
     }

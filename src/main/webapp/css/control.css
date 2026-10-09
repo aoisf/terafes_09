@@ -99,6 +99,13 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.command-buttons .cmd-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+}
+
 .cmd-btn:hover {
     opacity: 0.9;
 }

@@ -16,7 +16,19 @@ import model.PetCareLogic;
 @WebServlet("/food")
 public class FoodServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private final PetCareLogic petCareLogic = new PetCareLogic();
+    protected final PetCareLogic petCareLogic = new PetCareLogic();
+
+    protected PetCareLogic.CareItem[] getCareItems() {
+        return PetCareLogic.FOOD_ITEMS;
+    }
+
+    protected boolean applyCare(Pet pet, String itemId, BigInteger count) {
+        return petCareLogic.feed(pet, itemId, count);
+    }
+
+    protected String getCarePage() {
+        return "/WEB-INF/jsp/food.jsp";
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -25,8 +37,8 @@ public class FoodServlet extends HttpServlet {
         if (session.getAttribute("pet") == null) {
             session.setAttribute("pet", new Pet());
         }
-        request.setAttribute("items", PetCareLogic.FOOD_ITEMS);
-        request.getRequestDispatcher("/WEB-INF/jsp/food.jsp").forward(request, response);
+        request.setAttribute("items", getCareItems());
+        request.getRequestDispatcher(getCarePage()).forward(request, response);
     }
 
     @Override
@@ -60,7 +72,7 @@ public class FoodServlet extends HttpServlet {
             if (pet.getBalls().signum() > 0) {
                 session.removeAttribute("rescueClaimed");
             }
-            if (!invalidCount) success = petCareLogic.feed(pet, itemId, count);
+            if (!invalidCount) success = applyCare(pet, itemId, count);
             balls = pet.getBalls().toString();
             level = pet.getLevel();
             exp = pet.getExp().toString();

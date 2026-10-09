@@ -52,19 +52,7 @@ public class PetCareLogic {
 
     // ごはん実行（BigIntegerまとめ買い対応）
     public boolean feed(Pet pet, String itemId, BigInteger count) {
-        if (count == null || count.compareTo(BigInteger.ZERO) <= 0) return false;
-        for (CareItem item : FOOD_ITEMS) {
-            if (item.id().equals(itemId)) {
-                BigInteger totalCost = item.cost().multiply(count);
-                if (consumeBalls(pet, totalCost)) {
-                    BigInteger totalExp = item.expGain().multiply(count);
-                    addExp(pet, totalExp);
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
+        return purchaseCareItem(pet, itemId, count, FOOD_ITEMS);
     }
 
     public boolean feed(Pet pet, String itemId, int count) {
@@ -77,8 +65,13 @@ public class PetCareLogic {
 
     // あそぶ実行（BigIntegerまとめ買い対応）
     public boolean play(Pet pet, String itemId, BigInteger count) {
-        if (count == null || count.compareTo(BigInteger.ZERO) <= 0) return false;
-        for (CareItem item : PLAY_ITEMS) {
+        return purchaseCareItem(pet, itemId, count, PLAY_ITEMS);
+    }
+
+    // ごはん・あそぶで共通する玉消費と経験値付与
+    private boolean purchaseCareItem(Pet pet, String itemId, BigInteger count, CareItem[] items) {
+        if (pet == null || itemId == null || count == null || count.signum() <= 0) return false;
+        for (CareItem item : items) {
             if (item.id().equals(itemId)) {
                 BigInteger totalCost = item.cost().multiply(count);
                 if (consumeBalls(pet, totalCost)) {

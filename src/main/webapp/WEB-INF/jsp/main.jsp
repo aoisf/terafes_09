@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=7">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=2">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=6">
 </head>
 <body>
     <!-- メイン画面コンテナ -->
@@ -36,33 +36,19 @@
                 formattedMsg = actionMsg.replaceAll("([\\d,]+発)", "<span class=\"rainbow-text\">$1</span>");
             }
     %>
-        <div id="result-toast" class="pachinko-result-toast <%= isHit ? "hit" : "miss" %>">
+        <div id="result-toast" class="pachinko-result-toast <%= isHit ? "hit" : "miss" %>"
+             data-duration="<%= isHit ? 3200 : 2200 %>" role="status" aria-live="polite">
             <% if (isHit) { %>
                 ✨ <%= formattedMsg %> ✨
             <% } else { %>
                 <%= formattedMsg %>
             <% } %>
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var toast = document.getElementById('result-toast');
-                if (toast) {
-                    requestAnimationFrame(function() {
-                        toast.classList.add('show');
-                    });
-                    var duration = <%= isHit ? 3200 : 2200 %>;
-                    setTimeout(function() {
-                        toast.classList.remove('show');
-                        setTimeout(function() { toast.remove(); }, 400);
-                    }, duration);
-                }
-            });
-        </script>
     <%
         }
     %>
 
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=6"></script>
-    <script src="${pageContext.request.contextPath}/js/rescue.js?v=2"></script>
+    <script src="${pageContext.request.contextPath}/js/rescue.js?v=6"></script>
 </body>
 </html>

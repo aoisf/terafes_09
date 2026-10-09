@@ -71,6 +71,7 @@
 .exp-fill {
     display: block;
     height: 100%;
+    width: 0;
     background: #00cccc;
     border-radius: 5px;
 }
