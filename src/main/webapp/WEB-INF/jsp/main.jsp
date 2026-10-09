@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=10">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=7">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=10">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=6">
 </head>
 <body>
