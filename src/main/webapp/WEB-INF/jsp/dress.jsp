@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>おきがえ - パチペット生活</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css?v=2">
 </head>
 <body>

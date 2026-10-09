@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ごはん - パチペット生活</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/food.css?v=1">
 </head>

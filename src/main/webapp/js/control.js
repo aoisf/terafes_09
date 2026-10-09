@@ -2,14 +2,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     var panel = document.querySelector('.control-section');
     var startButton = document.getElementById('start-button');
+    var leverCaption = document.getElementById('lever-caption');
     var autoToggle = document.getElementById('auto-toggle');
     var ballDisplay = document.getElementById('main-ball-count');
     var actionUrl = panel.getAttribute('data-action-url');
     var autoTimer = null;
     var isRunning = false;
-    var isFetching = false;
+    var autoInFlight = 0;
+    var maxAutoInFlight = 5;
+    var manualInFlight = false;
+    var nextRequestSequence = 0;
+    var latestBallSequence = 0;
 
-    function updateBalls(value) {
+    function updateBalls(value, sequence) {
+        if (sequence != null && sequence < latestBallSequence) return;
+        if (sequence != null) latestBallSequence = sequence;
         if (ballDisplay) ballDisplay.textContent = BigInt(value).toLocaleString() + '発';
     }
 
@@ -21,6 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var percent = Number(fill.getAttribute('data-percent'));
         fill.style.width = Math.max(0, Math.min(100, percent)) + '%';
     });
+    var multiplierDisplay = document.getElementById('current-multiplier');
+    if (multiplierDisplay) {
+        var level = Number(multiplierDisplay.getAttribute('data-level'));
+        var multiplierPower = level <= 1 ? 0 : Math.floor((level - 1) / 2) + 1;
+        multiplierDisplay.textContent = (BigInt(3) ** BigInt(multiplierPower)).toLocaleString();
+    }
     var serverToast = document.getElementById('result-toast');
     if (serverToast) {
         requestAnimationFrame(function() { serverToast.classList.add('show'); });
@@ -57,22 +70,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function playPachinko() {
-        if (isFetching) return;
-        isFetching = true;
+        var autoRequest = isRunning && autoToggle.checked;
+        if (autoRequest) {
+            if (autoInFlight >= maxAutoInFlight) return;
+            autoInFlight++;
+        } else {
+            if (manualInFlight) return;
+            manualInFlight = true;
+        }
+        var requestSequence = ++nextRequestSequence;
         var showReels = !autoToggle.checked;
         var spinStartedAt = Date.now();
         if (showReels && typeof startPachinkoSpin === 'function') startPachinkoSpin();
 
+        function releaseRequest() {
+            if (autoRequest) autoInFlight = Math.max(0, autoInFlight - 1);
+            else manualInFlight = false;
+        }
+
         function finishRequest(result, callback, winningSymbol) {
             var delay = showReels ? Math.max(0, 600 - (Date.now() - spinStartedAt)) : 0;
             setTimeout(function() {
-                if (autoToggle.checked && isRunning && result !== 'empty'
+                if (autoRequest && isRunning && autoToggle.checked
                         && typeof setPachinkoAutoMode === 'function') {
                     setPachinkoAutoMode(true);
-                } else if (typeof stopPachinkoSpin === 'function') {
+                } else if (!autoRequest && typeof stopPachinkoSpin === 'function') {
                     stopPachinkoSpin(result, winningSymbol);
                 }
-                isFetching = false;
+                releaseRequest();
                 callback();
             }, delay);
         }
@@ -90,25 +115,36 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(function(data) {
-            if (data.balls != null) updateBalls(data.balls);
+            if (data.balls != null) updateBalls(data.balls, requestSequence);
             if (!data.canPlay) {
                 finishRequest('empty', function() {
-                    showToast('玉が足りません！', false);
-                    stopAuto();
+                    if (autoRequest) {
+                        if (isRunning) {
+                            stopAuto();
+                            showToast('玉が足りません！オートを停止しました。', false);
+                        }
+                    } else {
+                        showToast('玉が足りません！', false);
+                    }
                 });
                 return;
             }
 
             finishRequest(data.hit ? 'hit' : 'miss', function() {
-                if (data.hit || !isRunning) showToast(data.message, data.hit);
+                if (!autoRequest) showToast(data.message, data.hit);
             }, data.symbol);
         })
         .catch(function(error) {
             finishRequest('empty', function() {
                 console.error('通信エラー:', error);
-                stopAuto();
-                showToast('通信に失敗しました。画面を更新します。', false);
-                setTimeout(function() { window.location.reload(); }, 1400);
+                if (autoRequest) {
+                    if (isRunning) {
+                        stopAuto();
+                        showToast('オート通信に失敗したため停止しました。', false);
+                    }
+                } else {
+                    showToast('通信に失敗しました。もう一度お試しください。', false);
+                }
             });
         });
     }
@@ -116,28 +152,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function startAuto() {
         isRunning = true;
         if (typeof setPachinkoAutoMode === 'function') setPachinkoAutoMode(true);
-        startButton.textContent = 'ストップ！';
+        startButton.setAttribute('aria-label', 'オートを停止する');
+        if (leverCaption) leverCaption.textContent = 'PULL TO STOP';
         startButton.classList.add('is-auto-running');
         playPachinko();
         autoTimer = setInterval(function() {
             if (!isRunning) return stopAuto();
             playPachinko();
-        }, 1000);
+        }, 10);
     }
 
     function stopAuto() {
         isRunning = false;
         if (autoTimer) clearInterval(autoTimer);
         autoTimer = null;
-        startButton.textContent = 'スタート！';
+        startButton.setAttribute('aria-label', 'レバーを引いてスロットを回す');
+        if (leverCaption) leverCaption.textContent = 'PULL TO START';
         startButton.classList.remove('is-auto-running');
+        startButton.classList.remove('is-pulled');
+        if (typeof setPachinkoAutoMode === 'function') setPachinkoAutoMode(false);
     }
 
     startButton.addEventListener('click', function(event) {
         event.preventDefault();
         if (isRunning) return stopAuto();
         if (autoToggle.checked) startAuto();
-        else playPachinko();
+        else {
+            startButton.classList.add('is-pulled');
+            window.setTimeout(function() { startButton.classList.remove('is-pulled'); }, 420);
+            playPachinko();
+        }
     });
 
     autoToggle.addEventListener('change', function() {

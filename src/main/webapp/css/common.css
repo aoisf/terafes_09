@@ -13,10 +13,10 @@ body {
     min-height: 100vh;
 }
 
-/* 全体コンテナ: 600px幅に統一 */
+/* 全画面のコンテンツ幅を800pxに統一 */
 .app-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     min-height: 100vh;
     background-color: #ffffff;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
