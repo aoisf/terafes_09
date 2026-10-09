@@ -118,11 +118,13 @@
 
 .chance-lamp::before {
     position: absolute;
-    inset: 5px;
+    inset: 4px;
     border: 2px dashed rgba(255, 232, 160, 0.85);
     border-radius: 50%;
     content: "";
-    animation: chanceLampOrbit 8s linear infinite;
+    will-change: transform;
+    transform-origin: center;
+    animation: chanceLampOrbit 2.6s linear infinite;
 }
 
 .chance-lamp-star {
@@ -152,7 +154,7 @@
 }
 
 .pachinko-board.is-spinning .chance-lamp::before,
-.pachinko-board.auto-mode .chance-lamp::before { animation-duration: 1.4s; }
+.pachinko-board.auto-mode .chance-lamp::before { animation-duration: 1.2s; }
 
 .pachinko-board.is-hit .chance-lamp {
     border-color: #fffbd0;
@@ -163,7 +165,7 @@
     animation: chanceLampWin 0.42s ease-in-out 5;
 }
 
-.pachinko-board.is-hit .chance-lamp::before { border-style: solid; animation-duration: 1s; }
+.pachinko-board.is-hit .chance-lamp::before { animation-duration: 0.8s; }
 
 .pachinko-board.is-miss .chance-lamp {
     filter: saturate(0.72) brightness(0.82);
@@ -278,8 +280,43 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .chance-lamp,
-    .chance-lamp::before { animation: none !important; }
+    /* Chromeの動きを減らす設定でも、回転を止めて明るさの点滅は残す */
+    .chance-lamp {
+        animation: chanceLampReducedIdle 2.2s steps(2, end) infinite !important;
+    }
+
+    .chance-lamp::before { animation: chanceLampOrbit 2.6s linear infinite !important; }
+
+    .pachinko-board.is-spinning .chance-lamp::before,
+    .pachinko-board.auto-mode .chance-lamp::before { animation-duration: 1.2s !important; }
+
+    .pachinko-board.is-hit .chance-lamp::before { animation-duration: 0.8s !important; }
+
+    .pachinko-board.is-spinning .chance-lamp,
+    .pachinko-board.auto-mode .chance-lamp {
+        animation: chanceLampReducedSpin 0.65s steps(2, end) infinite alternate !important;
+    }
+
+    .pachinko-board.is-hit .chance-lamp {
+        animation: chanceLampReducedWin 0.45s steps(2, end) 5 !important;
+    }
+}
+
+@keyframes chanceLampReducedIdle {
+    50% { filter: brightness(1.35); }
+}
+
+@keyframes chanceLampReducedSpin {
+    from { filter: brightness(0.95) saturate(1); }
+    to { filter: brightness(1.75) saturate(1.35); }
+}
+
+@keyframes chanceLampReducedWin {
+    50% {
+        filter: brightness(1.8);
+        box-shadow: 0 0 0 7px rgba(255, 236, 124, 0.5), inset 0 0 22px #fff0a0,
+            0 0 42px rgba(255, 224, 81, 1);
+    }
 }
 
 /* 結果表示ポップアップ（トースト通知のベース） */
