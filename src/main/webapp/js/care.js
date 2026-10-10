@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var currentBalls = BigInt(page.getAttribute('data-balls'));
     var requestPending = false;
 
-    function showEvolution() {
+    function showEvolution(data) {
         var previousFocus = document.activeElement;
         var dialog = document.createElement('dialog');
         dialog.className = 'evolution-popup';
@@ -22,16 +22,16 @@ document.addEventListener('DOMContentLoaded', function() {
         var stage = document.createElement('div');
         stage.className = 'evolution-stage';
         var before = document.createElement('img');
-        before.src = page.getAttribute('data-pet-images') + 'lv1.png';
+        before.src = page.getAttribute('data-pet-images') + 'lv' + data.evolutionFrom + '.png';
         before.alt = '進化前のたまごろ';
         before.className = 'evolution-before';
         var after = document.createElement('img');
-        after.src = page.getAttribute('data-pet-images') + 'lv10.png';
-        after.alt = 'レベル10で進化したたまごろ';
+        after.src = page.getAttribute('data-pet-images') + 'lv' + data.evolutionTo + '.png';
+        after.alt = 'レベル' + data.evolutionTo + 'の姿に進化したたまごろ';
         after.className = 'evolution-after';
         stage.append(before, after);
         var message = document.createElement('p');
-        message.textContent = '殻の中から黒い靄が…！ おきがえは「ふつう」に戻ったよ。';
+        message.textContent = (data.evolutionTo >= 20 ? '殻が浮いて、黒い靄があふれてきた…！' : '殻の中から黒い靄が…！') + ' おきがえは「ふつう」に戻ったよ。';
         var close = document.createElement('button');
         close.type = 'button';
         close.textContent = 'やったね！';
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     currentBalls = BigInt(data.balls);
                     renderStatus(data.level, data.exp, data.nextExp);
-                    if (data.evolved) showEvolution();
+                    if (data.evolved) showEvolution(data);
                 })
                 .catch(function(error) {
                     console.error('育成操作に失敗しました:', error);
