@@ -34,6 +34,7 @@ public class GameActionServlet extends HttpServlet {
         final int[] order = {0, 1, 2, 3, 4, 5, 6, 7};
         long deadline;
         long roundStartedAt;
+        long issuedAt;
         int score;
         int pickups;
         int round = 1;
@@ -55,9 +56,10 @@ public class GameActionServlet extends HttpServlet {
         int zoneWidth() { return Math.max(36, 78 - (round - 1) * 16); }
         boolean complete() { return "work".equals(type) ? round > 3 : score >= 8; }
         String toJson() {
+            issuedAt = System.currentTimeMillis();
             return "{\"token\":\"" + token + "\",\"score\":" + score + ",\"round\":" + round
                     + ",\"zoneLeft\":" + zoneLeft + ",\"zoneWidth\":" + zoneWidth()
-                    + ",\"startedAt\":" + roundStartedAt + ",\"serverTime\":" + System.currentTimeMillis()
+                    + ",\"startedAt\":" + roundStartedAt + ",\"serverTime\":" + issuedAt + ",\"deadline\":" + deadline
                     + ",\"complete\":" + complete() + ",\"order\":" + java.util.Arrays.toString(order) + "}";
         }
     }
@@ -104,7 +106,15 @@ public class GameActionServlet extends HttpServlet {
                 } else {
                     game = (RescueGame) session.getAttribute(RESCUE_GAME_ATTRIBUTE);
                     long now = System.currentTimeMillis();
-                    if (game == null || game.complete() || now > game.deadline
+                    long playedAt;
+                    try {
+                        playedAt = Long.parseLong(request.getParameter("playedAt"));
+                    } catch (NumberFormatException e) {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
+                    }
+                    // 操作時刻は直近2秒以内に限定。通信到着が期限を越えても時間内の操作を確認する。
+                    if (game == null || game.complete() || playedAt > game.deadline
+                            || playedAt < game.issuedAt - 250 || playedAt < now - 2_000 || playedAt > now + 250
                             || !game.token.equals(request.getParameter("token"))) {
                         response.sendError(HttpServletResponse.SC_CONFLICT); return;
                     }
@@ -124,16 +134,22 @@ public class GameActionServlet extends HttpServlet {
                         if (!"stop".equals(request.getParameter("answer"))) {
                             response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
                         }
-                        double speed = 3 + (game.round - 1) * 1.4;
-                        boolean hit = false;
-                        // 通信遅延分の小さな許容幅を含め、サーバー時刻で目押しを判定。
-                        for (long lag = 0; lag <= 120; lag += 16) {
-                            long elapsed = now - game.roundStartedAt - lag;
-                            if (elapsed < 0) continue;
-                            double travel = elapsed / 16.0 * speed % 424;
-                            double position = (travel <= 212 ? travel : 424 - travel) + 7;
-                            if (position >= game.zoneLeft && position <= game.zoneLeft + game.zoneWidth()) hit = true;
+                        double elapsed;
+                        try {
+                            elapsed = Double.parseDouble(request.getParameter("elapsedMillis"));
+                        } catch (NumberFormatException | NullPointerException e) {
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
                         }
+                        // 最後に描画されたフレームの時刻から、画面と同じ位置を再計算する。
+                        // 申告時刻はサーバーの経過時間と照合し、任意の未来・過去への変更を拒否する。
+                        if (!Double.isFinite(elapsed) || elapsed < 0 || playedAt < game.roundStartedAt
+                                || Math.abs(elapsed - (playedAt - game.roundStartedAt)) > 100) {
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
+                        }
+                        double speed = 3 + (game.round - 1) * 1.4;
+                        double travel = elapsed / 16.0 * speed % 424;
+                        double position = (travel <= 212 ? travel : 424 - travel) + 7;
+                        boolean hit = position >= game.zoneLeft && position <= game.zoneLeft + game.zoneWidth();
                         if (hit) game.round++;
                         game.startRound(random);
                     }

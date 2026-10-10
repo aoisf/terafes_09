@@ -17,24 +17,38 @@ function rescueRequest(action, fields) {
     var params = new URLSearchParams(fields || {});
     params.set('action', action);
     var contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
+    var sentAt = performance.now();
     return fetch(contextPath + '/action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
         body: params.toString()
     }).then(function(response) {
         if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
+        return response.json().then(function(data) {
+            data.receivedAt = performance.now();
+            data.halfRoundTrip = (data.receivedAt - sentAt) / 2;
+            return data;
+        });
     });
 }
 
-function rescueStep(answer, callback) {
+function rescueServerNow() {
+    return rescueState.serverTime + rescueState.halfRoundTrip + performance.now() - rescueState.receivedAt;
+}
+
+function rescueSecondsLeft() {
+    return Math.max(0, Math.ceil((rescueState.deadline - rescueServerNow()) / 1000));
+}
+
+function rescueStep(answer, callback, elapsedMillis) {
     if (rescueStepPending || !rescueState) return;
     rescueStepPending = true;
     var generation = rescueGeneration;
-    rescueRequest('rescue-step', { token: rescueState.token, answer: answer }).then(function(data) {
+    var fields = { token: rescueState.token, answer: answer, playedAt: Math.round(rescueServerNow()) };
+    if (elapsedMillis != null) fields.elapsedMillis = elapsedMillis;
+    rescueRequest('rescue-step', fields).then(function(data) {
         if (generation !== rescueGeneration) return;
         rescueState = data;
-        rescueState.receivedAt = performance.now();
         callback(data);
     }).catch(function() {
         if (generation !== rescueGeneration) return;
@@ -102,7 +116,6 @@ function showRescueGame(type) {
     rescueRequest('rescue-start', { type: type }).then(function(data) {
         if (generation !== rescueGeneration) return;
         rescueState = data;
-        rescueState.receivedAt = performance.now();
         rescueStepPending = false;
         if (type === 'pick') runPickGame();
         else if (type === 'help') runHelpGame();
@@ -211,7 +224,7 @@ function completeMiniGame(type, message) {
 
 function runPickGame() {
     var goal = 8;
-    var secondsLeft = 18;
+    var secondsLeft = rescueSecondsLeft();
     var score = 0;
     var spawnCount = 0;
     var combo = 0;
@@ -236,6 +249,7 @@ function runPickGame() {
             rescueStep(isGold ? 'gold' : 'silver', function(data) {
             combo++;
             score = Math.min(goal, data.score);
+            secondsLeft = rescueSecondsLeft();
             hud.update(score, secondsLeft);
             gameTitle.textContent = combo >= 3 ? 'コンボ！いい調子！' : '銀玉を集めよう！';
             ball.remove();
@@ -248,20 +262,21 @@ function runPickGame() {
 
     spawnBall();
     activeInterval = window.setInterval(function() {
-        secondsLeft--;
+        secondsLeft = rescueSecondsLeft();
         hud.update(score, secondsLeft);
         if (secondsLeft <= 0) {
+            if (rescueStepPending) return;
             window.clearInterval(activeInterval);
             activeInterval = null;
             gameTitle.textContent = 'タイムアップ！あと少しだったね。';
             showRetryButton('もう一度チャレンジ', runPickGame);
         }
-    }, 1000);
+    }, 100);
 }
 
 function runHelpGame() {
     var goal = 8;
-    var secondsLeft = 25;
+    var secondsLeft = rescueSecondsLeft();
     var progress = 0;
     var combo = 0;
     var mistakes = 0;
@@ -326,6 +341,7 @@ function runHelpGame() {
         var button = event.target.closest('[data-category]');
         if (!button || changingItem || secondsLeft <= 0 || progress >= goal) return;
         rescueStep(button.getAttribute('data-category'), function(data) {
+        secondsLeft = rescueSecondsLeft();
         if (data.score > progress) {
             progress++;
             combo++;
@@ -347,7 +363,6 @@ function runHelpGame() {
         } else {
             mistakes++;
             combo = 0;
-            secondsLeft = Math.max(0, secondsLeft - 3);
             hud.update(progress, secondsLeft);
             itemCard.classList.remove('is-wrong');
             void itemCard.offsetWidth;
@@ -367,12 +382,13 @@ function runHelpGame() {
     }
 
     activeInterval = window.setInterval(function() {
-        secondsLeft--;
+        secondsLeft = rescueSecondsLeft();
         hud.update(progress, secondsLeft);
         if (secondsLeft <= 0) {
+            if (rescueStepPending) return;
             endSortingGame();
         }
-    }, 1000);
+    }, 100);
 }
 
 function runWorkGame() {
@@ -415,9 +431,13 @@ function runWorkGame() {
         var pos = 0;
         var speed = 3 + (round - 1) * 1.4;
         var maxPosition = Math.max(0, railWidth - 18);
-        var roundStart = rescueState.receivedAt + rescueState.startedAt - rescueState.serverTime;
+        var roundStart = rescueState.receivedAt + rescueState.startedAt - rescueState.serverTime - rescueState.halfRoundTrip;
+        var renderedElapsed = 0;
+        stopButton.disabled = true;
         activeInterval = window.setInterval(function() {
-            var travel = Math.max(0, performance.now() - roundStart) / 16 * speed % (maxPosition * 2);
+            renderedElapsed = Math.max(0, performance.now() - roundStart);
+            stopButton.disabled = performance.now() < roundStart;
+            var travel = renderedElapsed / 16 * speed % (maxPosition * 2);
             pos = travel <= maxPosition ? travel : maxPosition * 2 - travel;
             cursor.style.setProperty('--cursor-x', pos + 'px');
         }, 16);
@@ -450,7 +470,7 @@ function runWorkGame() {
                     focusGameControl();
                 }, 850);
             }
-            });
+            }, renderedElapsed);
         });
         gameControls.appendChild(stopButton);
     }

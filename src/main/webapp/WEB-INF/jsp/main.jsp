@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=18">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=10">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=6">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css?v=8">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css?v=9">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=1">
 </head>
 <body>
@@ -61,8 +61,8 @@
     %>
 
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=8"></script>
-    <script src="${pageContext.request.contextPath}/js/rescue.js?v=8"></script>
-    <script src="${pageContext.request.contextPath}/js/dashboard.js?v=8" defer></script>
+    <script src="${pageContext.request.contextPath}/js/rescue.js?v=9"></script>
+    <script src="${pageContext.request.contextPath}/js/dashboard.js?v=9" defer></script>
     <script src="${pageContext.request.contextPath}/js/image-preview.js?v=2" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=1" data-context="${pageContext.request.contextPath}" defer></script>
 </body>

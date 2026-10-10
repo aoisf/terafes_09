@@ -3,6 +3,16 @@
     var dashboard = document.getElementById('dashboard-ui');
     if (!dashboard) return;
 
+    // ネイティブのモーダルに置き換え、Tab移動と背後の操作をブラウザー側で制限する。
+    dashboard.querySelectorAll('[data-dialog]').forEach(function(original) {
+        var dialog = document.createElement('dialog');
+        Array.from(original.attributes).forEach(function(attribute) {
+            dialog.setAttribute(attribute.name, attribute.value);
+        });
+        while (original.firstChild) dialog.appendChild(original.firstChild);
+        original.replaceWith(dialog);
+    });
+
     var autoToggle = document.getElementById('auto-toggle');
     var defaultAuto = document.getElementById('default-auto-setting');
     var encyclopedia = dashboard.querySelector('[data-dialog="encyclopedia"]');
@@ -122,6 +132,7 @@
     function closeDialog(dialog) {
         if (!dialog) return;
         if (dialog === encyclopedia) showEncyclopediaList();
+        dialog.close();
         dialog.hidden = true;
         document.body.classList.remove('dashboard-dialog-open');
         if (lastTrigger) lastTrigger.focus();
@@ -132,10 +143,12 @@
             var dialog = dashboard.querySelector('[data-dialog="' + button.getAttribute('data-open-dialog') + '"]');
             if (!dialog) return;
             dashboard.querySelectorAll('[data-dialog]').forEach(function(openDialog) {
+                if (openDialog.open) openDialog.close();
                 openDialog.hidden = true;
             });
             lastTrigger = button;
             dialog.hidden = false;
+            dialog.showModal();
             document.body.classList.add('dashboard-dialog-open');
             var closeButton = dialog.querySelector('[data-close-dialog]');
             if (closeButton) closeButton.focus();
@@ -184,19 +197,28 @@
         button.addEventListener('click', function() { closeDialog(button.closest('[data-dialog]')); });
     });
     dashboard.querySelectorAll('[data-dialog]').forEach(function(dialog) {
+        dialog.addEventListener('cancel', function(event) {
+            event.preventDefault();
+            if (dialog === encyclopedia && encyclopediaList && encyclopediaList.hidden) {
+                showEncyclopediaList();
+                if (lastEncyclopediaTrigger) lastEncyclopediaTrigger.focus();
+            } else closeDialog(dialog);
+        });
         dialog.addEventListener('click', function(event) {
             if (event.target === dialog) closeDialog(dialog);
         });
     });
     document.addEventListener('keydown', function(event) {
-        if (event.key !== 'Escape') return;
+        if (event.key !== 'Escape' || event.defaultPrevented) return;
         var openedDialog = dashboard.querySelector('[data-dialog]:not([hidden])');
+        if (!openedDialog || !openedDialog.contains(document.activeElement)) return;
         if (openedDialog === encyclopedia && encyclopediaList && encyclopediaList.hidden) {
             showEncyclopediaList();
             if (lastEncyclopediaTrigger) lastEncyclopediaTrigger.focus();
             event.preventDefault();
             event.stopPropagation();
         } else if (openedDialog) {
+            event.preventDefault();
             closeDialog(openedDialog);
         }
     });
