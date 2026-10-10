@@ -26,4 +26,4 @@
         </div>
     </div>
 </section>
-<script src="${pageContext.request.contextPath}/js/control.js?v=6" defer></script>
+<script src="${pageContext.request.contextPath}/js/control.js?v=7" defer></script>

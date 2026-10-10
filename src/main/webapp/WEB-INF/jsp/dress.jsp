@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>おきがえ - パチペット生活</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css?v=4">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
 </head>
@@ -41,7 +41,7 @@
             <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
         </div>
     </div>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=3" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

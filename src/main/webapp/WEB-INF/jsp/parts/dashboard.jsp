@@ -136,6 +136,10 @@
                 <span><strong>展示データをリセット</strong><small>玉数・レベル・プレイ記録を初期化します</small></span>
                 <button class="dashboard-danger-button" type="button" data-reset-game>リセット</button>
             </div>
+            <div class="setting-row reset-setting">
+                <span><strong>呼び込みモード</strong><small>5分間操作がないとリセットして、夜祭りの呼び込み画面へ切り替わります</small></span>
+                <button class="festival-preview-button" type="button" data-preview-attract>演出を見る</button>
+            </div>
             <p class="dashboard-footnote">オート設定はこのブラウザーに保存されます。ゲームの状態と記録は展示中のみ保持されます。</p>
         </div>
     </div>

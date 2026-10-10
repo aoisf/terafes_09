@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var manualInFlight = false;
     var nextRequestSequence = 0;
     var latestBallSequence = 0;
+    var exhibitionIdle = false;
+    window.addEventListener('pachipet-idle', function() {
+        exhibitionIdle = true;
+        stopAuto();
+    });
 
     // 既存の姿をそのまま使う、9秒間のお祭り演出。
     var festivalLayer = null;
@@ -255,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             finishRequest(data.hit ? 'hit' : 'miss', function() {
-                if (data.festival) startFestival(false);
+                if (data.festival && !exhibitionIdle) startFestival(false);
                 if (!autoRequest) showToast(data.message, data.hit);
             }, data.symbol);
         })
@@ -300,6 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     startButton.addEventListener('click', function(event) {
         event.preventDefault();
+        exhibitionIdle = false;
         if (isRunning) return stopAuto();
         if (autoToggle.checked) startAuto();
         else {

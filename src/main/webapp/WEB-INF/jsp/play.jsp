@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>あそぶ - パチペット生活</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/play.css?v=1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
@@ -59,7 +59,7 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/js/care.js?v=13" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=3" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

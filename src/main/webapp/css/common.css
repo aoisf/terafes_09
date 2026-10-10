@@ -60,3 +60,46 @@ section {
 .back-link:hover {
     background: #333;
 }
+
+/* 夜祭りの呼び込み舞台。キャラクターは既存のレベル1画像を使用。 */
+body.attract-open { overflow: hidden; }
+.attract-screen:not([open]) { display:none; }
+.attract-screen { position:fixed; inset:0; margin:0; width:100%; height:100%; max-width:none; max-height:none; border:0; padding:32px 20px; overflow:auto; color:#fff4ce; background:radial-gradient(ellipse at 50% 52%,#65304d 0%,#24203e 45%,#090f24 90%); text-align:center; font-family:inherit; }
+.attract-screen::backdrop { background:#090f24; }
+.attract-screen::before { content:''; position:fixed; inset:12px; border:1px solid #d9ac59; box-shadow:inset 0 0 0 5px #d9ac5920,inset 0 0 70px #eab95816; border-radius:22px; pointer-events:none; }
+.attract-content { position:relative; z-index:2; max-width:850px; margin:auto; min-height:calc(100% - 64px); display:flex; flex-direction:column; justify-content:center; align-items:center; padding:45px 0 20px; }
+.attract-sparks { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; }
+.attract-lanterns { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-around; pointer-events:none; z-index:3; }
+.attract-lanterns span { display:grid; place-items:center; width:42px; height:56px; margin-top:calc(8px + mod(var(--i), 3)*7px); border-radius:40%; color:#fff0b7; font-weight:900; font-size:22px; border:2px solid #f5cc78; background:repeating-linear-gradient(0deg,#ed5759 0 9px,#bf333e 10px 11px); box-shadow:0 0 25px #ff8c4b88,inset 0 0 12px #ffe18a; transform-origin:50% -30px; animation:attract-sway 3s ease-in-out infinite; animation-delay:calc(var(--i)*-.3s); }
+.attract-lanterns span::before { content:''; position:absolute; bottom:100%; height:35px; width:1px; background:#efc778; }
+.attract-kicker { letter-spacing:.2em; font-size:clamp(12px,2vw,16px); color:#efd591; margin:0 0 12px; }
+.attract-screen h1 { margin:0; font-size:clamp(38px,7vw,72px); font-weight:900; letter-spacing:.03em; line-height:1.15; color:#ffe199; text-shadow:0 3px 0 #9b4929,0 0 25px #ffb84c55; }
+.attract-screen h1 small { display:block; margin-bottom:8px; color:#fff5df; font-size:.3em; letter-spacing:.15em; }
+.attract-screen h1 span { color:#fff7dd; }
+.attract-stage { position:relative; width:min(380px,80vw); height:250px; margin:16px 0 6px; }
+.attract-halo { position:absolute; width:240px; height:240px; top:0; left:calc(50% - 120px); border-radius:50%; background:repeating-conic-gradient(from 0deg,#ffc86124 0deg 10deg,transparent 10deg 20deg); box-shadow:0 0 80px #ffa95c33; animation:attract-turn 36s linear infinite; }
+.attract-halo::after { content:''; position:absolute; inset:20px; border:1px dashed #ffdc87aa; border-radius:50%; }
+.attract-mascot { position:absolute; inset:0; animation:attract-hop 2.4s ease-in-out infinite; transform-origin:50% 85%; z-index:2; }
+.attract-mascot img { width:270px; height:270px; max-width:100%; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 0 14px #ffd56a55); pointer-events:none; }
+.attract-podium { position:absolute; left:15%; right:15%; bottom:0; height:32px; border-radius:50%; background:radial-gradient(ellipse,#ffdc9870,#ef799524 65%,transparent 70%); border-bottom:2px solid #ffdd9270; }
+.attract-cheer { position:absolute; z-index:3; top:28px; right:-8px; padding:8px 14px; background:#fff1ce; color:#713143; border-radius:15px 15px 15px 0; font-weight:bold; font-size:14px; transform:rotate(8deg); animation:attract-float 3s ease-in-out infinite; }
+.attract-heart,.attract-star { position:absolute; z-index:3; font-size:36px; text-shadow:0 0 16px currentColor; animation:attract-float 2s ease-in-out infinite; }
+.attract-heart { left:12px; top:100px; color:#ff88ac; }
+.attract-star { right:20px; bottom:28px; color:#ffe099; animation-delay:-1s; }
+.attract-message { font-weight:700; font-size:clamp(14px,2.5vw,20px); margin:10px 0 18px; }
+.attract-steps { display:flex; justify-content:center; align-items:center; gap:14px; font-size:13px; margin-bottom:24px; }
+.attract-steps span { display:grid; gap:6px; }
+.attract-steps b { color:#e7bb75; font-size:12px; letter-spacing:.2em; }
+.attract-steps i { color:#f4c16e; font-size:25px; font-style:normal; }
+.attract-start { border:2px solid #fff1bc; border-radius:100px; padding:16px 46px; background:linear-gradient(135deg,#ffdb77,#ffad50); color:#482633; font-family:inherit; font-size:clamp(19px,3vw,25px); font-weight:900; cursor:pointer; box-shadow:0 5px 0 #a35039,0 0 35px #ffbe5555; animation:attract-pulse 2.4s ease-in-out infinite; }
+.attract-start span { display:block; font-size:10px; letter-spacing:.25em; margin-top:5px; }
+.attract-start:focus-visible { outline:3px solid #fff; outline-offset:6px; }
+.attract-footnote { color:#dabaca; font-size:12px; margin:20px 0 0; }
+.attract-curtain { position:fixed; bottom:0; left:0; right:0; height:18px; background:repeating-linear-gradient(90deg,#be344a 0 36px,#fff0ce 36px 72px); border-top:3px solid #f6c374; }
+@keyframes attract-hop { 0%,35%,65%,100% { transform:translateY(0) rotate(-3deg); } 45% { transform:translateY(-22px) rotate(5deg); } 55% { transform:translateY(-6px) rotate(-4deg); } 85% { transform:translateY(-10px) rotate(3deg); } }
+@keyframes attract-turn { to { transform:rotate(360deg); } }
+@keyframes attract-float { 50% { translate:0 -10px; } }
+@keyframes attract-sway { 50% { transform:rotate(7deg); } }
+@keyframes attract-pulse { 50% { box-shadow:0 5px 0 #a35039,0 0 55px #ffbe5599; } }
+@media(max-width:480px) { .attract-screen { padding:25px 12px; } .attract-steps { gap:8px; font-size:11px; } .attract-lanterns span { width:27px; height:40px; font-size:17px; } .attract-cheer { right:0; } }
+@media(prefers-reduced-motion:reduce) { .attract-screen *, .attract-screen *::after { animation:none!important; } }

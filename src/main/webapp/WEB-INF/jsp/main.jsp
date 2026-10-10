@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>玉の数だけ愛される？パチペット生活</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/room.css?v=7">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pachinko.css?v=18">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=10">
@@ -63,7 +63,7 @@
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=8"></script>
     <script src="${pageContext.request.contextPath}/js/rescue.js?v=10"></script>
     <script src="${pageContext.request.contextPath}/js/dashboard.js?v=10" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=3" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

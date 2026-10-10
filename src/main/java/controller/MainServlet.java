@@ -29,7 +29,8 @@ public class MainServlet extends HttpServlet {
         if ("true".equals(request.getParameter("reset"))) {
             session.invalidate();
             session = request.getSession(true);
-            response.sendRedirect(request.getContextPath() + "/main");
+            response.sendRedirect(request.getContextPath() + "/main"
+                    + ("true".equals(request.getParameter("attract")) ? "?attract=true" : ""));
             return;
         }
 
