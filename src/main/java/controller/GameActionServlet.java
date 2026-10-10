@@ -88,6 +88,7 @@ public class GameActionServlet extends HttpServlet {
         String slotSymbol = "";
         boolean isHit = false;
         boolean canPlay = false;
+        boolean festival = false;
 
         if ("rescue-start".equals(action) || "rescue-step".equals(action)) {
             response.setContentType("application/json; charset=UTF-8");
@@ -211,6 +212,7 @@ public class GameActionServlet extends HttpServlet {
                 // パチンコ実行 (10発消費)
                 if (petCareLogic.consumeBalls(pet, 10)) {
                     canPlay = true;
+                    festival = random.nextInt(1000) == 0;
                     int result = random.nextInt(20);
                     if (result < SLOT_SYMBOLS.length) {
                         isHit = true;
@@ -236,9 +238,10 @@ public class GameActionServlet extends HttpServlet {
         if (accept != null && accept.contains("application/json")) {
             response.setContentType("application/json; charset=UTF-8");
             String json = String.format(
-                "{\"canPlay\": %b, \"hit\": %b, \"symbol\": \"%s\", \"message\": \"%s\", \"balls\": \"%s\", \"record\": %s}",
+                "{\"canPlay\": %b, \"hit\": %b, \"festival\": %b, \"symbol\": \"%s\", \"message\": \"%s\", \"balls\": \"%s\", \"record\": %s}",
                 canPlay,
                 isHit,
+                festival,
                 escapeJson(slotSymbol),
                 escapeJson(message),
                 getBallsSnapshot(pet).toString(),

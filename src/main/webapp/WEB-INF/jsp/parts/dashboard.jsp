@@ -129,6 +129,10 @@
                 <input type="checkbox" id="default-auto-setting">
             </label>
             <div class="setting-row reset-setting">
+                <span><strong>お祭りフィーバー</strong><small>1スピンにつき0.1％で発動する、9秒間のお祭り演出</small></span>
+                <button class="festival-preview-button" type="button" data-preview-festival>演出を見る</button>
+            </div>
+            <div class="setting-row reset-setting">
                 <span><strong>展示データをリセット</strong><small>玉数・レベル・プレイ記録を初期化します</small></span>
                 <button class="dashboard-danger-button" type="button" data-reset-game>リセット</button>
             </div>

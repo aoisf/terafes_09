@@ -1,4 +1,35 @@
 /* 育成ルーム */
+/* お祭りフィーバー：通常操作を遮らない画面全体の演出。 */
+.festival-layer { position: fixed; inset: 0; z-index: 400; pointer-events: none; overflow: hidden; background: radial-gradient(ellipse at 50% 35%, transparent 28%, rgba(39, 9, 37, .24) 80%), linear-gradient(180deg, rgba(22, 10, 40, .6), transparent 24%, transparent 85%, rgba(121, 22, 40, .3)); animation: festival-arrive .5s ease-out; transition: opacity .5s; }
+.festival-layer.is-ending { opacity: 0; }
+.festival-fireworks { position: absolute; inset: 0; width: 100%; height: 100%; }
+.festival-canopy { position: absolute; inset: 0 0 auto; display: flex; justify-content: space-around; border-top: 4px solid #e1ab42; filter: drop-shadow(0 4px 8px #300b25); }
+.festival-lantern { position: relative; display: grid; place-items: center; width: clamp(27px, 6vw, 58px); height: clamp(40px, 8vw, 76px); margin-top: 15px; border: 2px solid #ffc463; border-radius: 40%; background: repeating-linear-gradient(90deg, transparent 0 8px, #7d112c44 9px 10px), radial-gradient(ellipse, #ffb54c, #ee3e43 65%, #891736); color: #61152b; font: 900 clamp(20px, 3vw, 35px) 'Yu Mincho', serif; box-shadow: 0 0 23px #ff993777, inset 0 0 10px #ffdc98; transform-origin: center -16px; animation: festival-sway 2s ease-in-out infinite alternate; animation-delay: var(--sway-delay); }
+.festival-lantern:nth-child(even) { background: repeating-linear-gradient(90deg, transparent 0 8px, #ad6b1944 9px 10px), radial-gradient(ellipse, #fff4be, #ffce59 65%, #d68d28); }
+.festival-lantern::before { content: ''; position: absolute; width: 2px; height: 17px; background: #efc578; top: -17px; }
+.festival-lantern::after { content: ''; position: absolute; width: 55%; height: 5px; background: #613326; bottom: -5px; border-radius: 2px; }
+.festival-title { position: absolute; top: 25%; left: 50%; width: min(88vw, 690px); text-align: center; transform: translateX(-50%); color: #fff3c3; filter: drop-shadow(0 6px 0 #58162a) drop-shadow(0 0 25px #ffbc58); animation: festival-title 9s both; }
+.festival-title strong { display: block; font: 900 clamp(64px, 14vw, 132px)/1.05 'Yu Mincho', 'MS PMincho', serif; -webkit-text-stroke: 2px #9b2535; text-shadow: 3px 3px 0 #e89136, -2px -2px 0 #fff7db; }
+.festival-title strong span { display: block; font-size: .52em; letter-spacing: .08em; }
+.festival-eyebrow { display: inline-block; padding: 7px 25px; border-top: 1px solid #f6d686; border-bottom: 1px solid #f6d686; background: #4c142acc; font: 700 clamp(13px, 2vw, 20px) serif; letter-spacing: .25em; margin-bottom: 12px; }
+.festival-subtitle { display: inline-block; padding: 8px 18px; margin-top: 20px; border: 1px solid #f2bd65; border-radius: 30px; background: #7f1734eb; font-weight: 800; font-size: clamp(12px, 2vw, 19px); }
+.festival-badge { position: absolute; right: 16px; bottom: 48px; padding: 10px 18px; border: 2px solid #f0c267; border-radius: 9px; background: linear-gradient(135deg, #65182c, #a82b37); color: #fff2bd; box-shadow: 0 0 22px #ffa83955, inset 0 0 0 2px #57162b; font-size: clamp(12px, 2vw, 16px); font-weight: 900; }
+.festival-curtain { position: absolute; bottom: 0; width: 100%; height: 28px; border-top: 4px solid #d5a243; background: repeating-linear-gradient(90deg, #d83743 0 28px, #fff0d3 28px 56px); box-shadow: 0 -5px 25px #dd7c4544; }
+.festival-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.festival-active .room-section { border-color: #f0b43d; box-shadow: 0 0 0 3px #ffe0a088, 0 0 36px #f19948aa; }
+.festival-active .room-section .pet-area { position: relative; }
+.festival-active .room-section .pet-image { animation: festival-pet-hop .65s ease-in-out infinite; }
+.festival-pet-reaction { position: absolute; inset: 0; pointer-events: none; }
+.festival-pixel-heart { position: absolute; top: 8px; left: -28px; width: 24px; height: 24px; background: #ffba54; clip-path: polygon(0 15%,15% 15%,15% 0,40% 0,40% 15%,60% 15%,60% 0,85% 0,85% 15%,100% 15%,100% 55%,85% 55%,85% 70%,70% 70%,70% 85%,55% 85%,55% 100%,40% 100%,40% 85%,25% 85%,25% 70%,10% 70%,10% 55%,0 55%); animation: festival-float .85s ease-in-out infinite alternate; }
+.festival-pixel-shout { position: absolute; top: -7px; right: -24px; color: #fff2ae; background: #b6253d; border: 3px solid #ffca61; box-shadow: 3px 3px 0 #641831; padding: 0 7px; font: 900 25px monospace; animation: festival-float .75s ease-in-out infinite alternate-reverse; }
+.festival-pet-cheer { position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%); white-space: nowrap; background: #70223c; color: #fff2bb; border: 1px solid #ffc865; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 900; }
+.festival-preview-button { padding: 9px 12px; border: 1px solid #c59b46; border-radius: 8px; background: linear-gradient(#fff5cc, #f4d47b); color: #693222; font: inherit; font-weight: 800; cursor: pointer; }
+@keyframes festival-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes festival-sway { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+@keyframes festival-float { from { transform: translateY(2px); } to { transform: translateY(-9px); } }
+@keyframes festival-pet-hop { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-13px) rotate(3deg); } }
+@keyframes festival-title { 0% { opacity: 0; transform: translateX(-50%) scale(.6); } 7%,30% { opacity: 1; transform: translateX(-50%) scale(1); } 42%,100% { opacity: 0; transform: translateX(-50%) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .festival-layer, .festival-title, .festival-lantern, .festival-active .room-section .pet-image, .festival-pixel-heart, .festival-pixel-shout { animation: none; } .festival-title { opacity: 1; } }
 .room-section {
     isolation: isolate;
     background-color: #e9f1e7;

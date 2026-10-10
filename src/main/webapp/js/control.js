@@ -14,6 +14,127 @@ document.addEventListener('DOMContentLoaded', function() {
     var nextRequestSequence = 0;
     var latestBallSequence = 0;
 
+    // 既存の姿をそのまま使う、9秒間のお祭り演出。
+    var festivalLayer = null;
+    var festivalEnd = 0;
+    var festivalFrame = null;
+    var festivalChain = 0;
+    function startFestival(preview) {
+        festivalEnd = performance.now() + 9000;
+        if (festivalLayer) {
+            festivalChain++;
+            return;
+        }
+        festivalChain = 1;
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        festivalLayer = document.createElement('div');
+        festivalLayer.className = 'festival-layer';
+        festivalLayer.setAttribute('aria-hidden', 'true');
+        var canopy = document.createElement('div');
+        canopy.className = 'festival-canopy';
+        for (var i = 0; i < 9; i++) {
+            var lantern = document.createElement('span');
+            lantern.className = 'festival-lantern';
+            lantern.textContent = i % 2 ? '祝' : '祭';
+            lantern.style.setProperty('--sway-delay', (-i * .27) + 's');
+            canopy.appendChild(lantern);
+        }
+        var title = document.createElement('div');
+        title.className = 'festival-title';
+        title.innerHTML = '<span class="festival-eyebrow">今宵、銀玉乱舞。</span><strong>祭<span>フィーバー</span></strong><span class="festival-subtitle">たまごろうと、お祭り騒ぎ！</span>';
+        var badge = document.createElement('div');
+        badge.className = 'festival-badge';
+        var curtain = document.createElement('div');
+        curtain.className = 'festival-curtain';
+        var canvas = document.createElement('canvas');
+        canvas.className = 'festival-fireworks';
+        festivalLayer.append(canvas, canopy, title, badge, curtain);
+        document.body.appendChild(festivalLayer);
+        document.body.classList.add('festival-active');
+        var petArea = document.querySelector('.room-section .pet-area');
+        var reaction = document.createElement('div');
+        reaction.className = 'festival-pet-reaction';
+        reaction.setAttribute('aria-hidden', 'true');
+        reaction.innerHTML = '<span class="festival-pixel-heart"></span><span class="festival-pixel-shout">!</span><span class="festival-pet-cheer">わっしょい！</span>';
+        if (petArea) petArea.appendChild(reaction);
+        var notice = document.createElement('div');
+        notice.className = 'festival-announcement';
+        notice.setAttribute('role', 'status');
+        notice.textContent = preview ? 'お祭りフィーバーの演出プレビュー' : 'お祭りフィーバー！';
+        document.body.appendChild(notice);
+        var context = canvas.getContext('2d');
+        var particles = [];
+        var width = 0, height = 0, lastBurst = 0, previous = performance.now();
+        var colors = ['#ffd861', '#ff657f', '#65eced', '#fff3ce', '#c4a0ff'];
+        function resize() {
+            width = window.innerWidth; height = window.innerHeight;
+            var ratio = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = width * ratio; canvas.height = height * ratio;
+            if (context) context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        function burst(now) {
+            var x = width * (.12 + Math.random() * .76);
+            var y = height * (.12 + Math.random() * .42);
+            var color = colors[Math.floor(Math.random() * colors.length)];
+            for (var j = 0; j < 72; j++) {
+                var angle = j / 72 * Math.PI * 2;
+                var speed = (j % 3 === 0 ? 110 : 220) + Math.random() * 35;
+                particles.push({x:x, y:y, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed, life:1.5, max:1.5, color:color, size:2.5, confetti:false});
+            }
+            for (var k = 0; k < 14; k++) {
+                particles.push({x:Math.random()*width, y:-20, vx:(Math.random()-.5)*60, vy:100+Math.random()*100, life:4.5, max:4.5, color:colors[k%colors.length], size:4+Math.random()*4, confetti:true});
+            }
+            lastBurst = now;
+        }
+        var finished = false;
+        function finish() {
+            if (finished) return;
+            finished = true;
+            window.removeEventListener('pagehide', finish);
+            window.removeEventListener('resize', resize);
+            if (festivalFrame != null) cancelAnimationFrame(festivalFrame);
+            festivalFrame = null;
+            document.body.classList.remove('festival-active');
+            reaction.remove(); notice.remove();
+            var endingLayer = festivalLayer;
+            festivalLayer = null;
+            endingLayer.classList.add('is-ending');
+            window.setTimeout(function() { endingLayer.remove(); }, 500);
+        }
+        function draw(now) {
+            if (now >= festivalEnd || document.hidden) { finish(); return; }
+            badge.textContent = (preview ? '演出プレビュー' : festivalChain > 1 ? '祭り連発 ×' + festivalChain : '祭フィーバー開催中') + ' · ' + Math.ceil((festivalEnd - now)/1000) + '秒';
+            var dt = Math.min((now - previous) / 1000, .05); previous = now;
+            if (context && !reducedMotion) {
+                context.clearRect(0, 0, width, height);
+                if (now - lastBurst > 520) burst(now);
+                particles = particles.filter(function(p) { return p.life > 0; });
+                particles.forEach(function(p) {
+                    p.life -= dt; p.x += p.vx*dt; p.y += p.vy*dt;
+                    if (!p.confetti) p.vy += 60*dt;
+                    context.globalAlpha = Math.max(0, Math.min(1, p.life / p.max * 2));
+                    context.fillStyle = p.color;
+                    context.save(); context.translate(p.x, p.y);
+                    if (p.confetti) context.rotate(now / 550 + p.x);
+                    context.fillRect(-p.size/2, -p.size/2, p.size, p.confetti ? p.size*1.7 : p.size);
+                    context.restore();
+                });
+                context.globalAlpha = 1;
+            }
+            festivalFrame = requestAnimationFrame(draw);
+        }
+        festivalFrame = requestAnimationFrame(draw);
+        window.addEventListener('pagehide', finish, {once:true});
+    }
+    var festivalPreview = document.querySelector('[data-preview-festival]');
+    if (festivalPreview) festivalPreview.addEventListener('click', function() {
+        var dialog = festivalPreview.closest('[data-dialog]');
+        if (dialog) dialog.querySelector('[data-close-dialog]').click();
+        startFestival(true);
+    });
+
     function updateBalls(value, sequence) {
         if (sequence != null && sequence < latestBallSequence) return;
         if (sequence != null) latestBallSequence = sequence;
@@ -134,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             finishRequest(data.hit ? 'hit' : 'miss', function() {
+                if (data.festival) startFestival(false);
                 if (!autoRequest) showToast(data.message, data.hit);
             }, data.symbol);
         })
