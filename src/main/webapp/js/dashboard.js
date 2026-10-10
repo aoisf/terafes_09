@@ -109,7 +109,7 @@
         if (background) background.classList.toggle('is-unlocked', forestUnlocked);
         dashboard.querySelectorAll('[data-background-choice]').forEach(function(button) {
             var threshold = Number(button.getAttribute('data-background-threshold')) || 0;
-            button.disabled = threshold > 0 && totalActions < threshold;
+            button.disabled = backgroundRequestPending || (threshold > 0 && totalActions < threshold);
         });
         var nextMilestone = backgroundMilestones.find(function(milestone) { return totalActions < milestone.threshold; });
         if (backgroundCopy) {
@@ -142,9 +142,13 @@
         });
     });
 
+    var backgroundRequestPending = false;
     dashboard.querySelectorAll('[data-background-choice]').forEach(function(button) {
         button.addEventListener('click', function() {
-            if (button.disabled) return;
+            if (button.disabled || backgroundRequestPending) return;
+            backgroundRequestPending = true;
+            var choices = Array.from(dashboard.querySelectorAll('[data-background-choice]'));
+            choices.forEach(function(option) { option.disabled = true; });
             var body = new URLSearchParams();
             body.set('background', button.getAttribute('data-background-choice'));
             fetch(dashboard.getAttribute('data-background-url'), {
@@ -165,6 +169,13 @@
                 });
             }).catch(function(error) {
                 window.alert(error.message);
+            }).finally(function() {
+                backgroundRequestPending = false;
+                var total = dashboard.querySelector('[data-record-value="totalActions"]');
+                var actions = total ? Number(total.textContent.replace(/,/g, '')) || 0 : 0;
+                choices.forEach(function(option) {
+                    option.disabled = actions < (Number(option.getAttribute('data-background-threshold')) || 0);
+                });
             });
         });
     });

@@ -1,11 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!-- 救済ポップアップ（0発のときだけ画面中央に出現） -->
+<!-- 救済ポップアップ（10発未満のときに画面中央に出現） -->
 <div id="rescue-modal" role="dialog" aria-modal="true" aria-labelledby="rescue-title"
      aria-hidden="true" data-initial-balls="${pet.balls}">
     <div class="rescue-modal-box">
         <h3 id="rescue-title" class="rescue-title">🛟 すっからかん救済センター 🛟</h3>
         <p class="rescue-description">
-            玉が完全に尽きてしまいました…！<br>ミニゲームをクリアして銀玉を手に入れよう！
+            パチンコを回すには玉が足りません…！<br>ミニゲームをクリアして銀玉を手に入れよう！
         </p>
         <p id="rescue-status" class="rescue-status" role="status" aria-live="polite" hidden></p>
         

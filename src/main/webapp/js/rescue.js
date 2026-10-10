@@ -9,6 +9,41 @@ var rescueStatus = null;
 var activeInterval = null;
 var activeTimeout = null;
 var rescueRequestPending = false;
+var rescueState = null;
+var rescueGeneration = 0;
+var rescueStepPending = false;
+
+function rescueRequest(action, fields) {
+    var params = new URLSearchParams(fields || {});
+    params.set('action', action);
+    var contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
+    return fetch(contextPath + '/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+        body: params.toString()
+    }).then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+    });
+}
+
+function rescueStep(answer, callback) {
+    if (rescueStepPending || !rescueState) return;
+    rescueStepPending = true;
+    var generation = rescueGeneration;
+    rescueRequest('rescue-step', { token: rescueState.token, answer: answer }).then(function(data) {
+        if (generation !== rescueGeneration) return;
+        rescueState = data;
+        rescueState.receivedAt = performance.now();
+        callback(data);
+    }).catch(function() {
+        if (generation !== rescueGeneration) return;
+        cancelRescueGame(false);
+        setRescueStatus('進捗を保存できませんでした。メニューからもう一度挑戦してね。');
+    }).finally(function() {
+        if (generation === rescueGeneration) rescueStepPending = false;
+    });
+}
 
 function setRescueOpen(isOpen) {
     if (!rescueModal) return;
@@ -34,7 +69,7 @@ function setRescueOpen(isOpen) {
 function checkZeroBalls(ballsVal) {
     if (!rescueModal) return;
     var cleaned = String(ballsVal == null ? '' : ballsVal).replace(/[^0-9]/g, '');
-    setRescueOpen(cleaned !== '' && /^0+$/.test(cleaned));
+    setRescueOpen(cleaned !== '' && BigInt(cleaned) < 10n);
 }
 
 function setRescueStatus(message) {
@@ -61,18 +96,29 @@ function showRescueGame(type) {
     gameCanvas.innerHTML = '';
     gameControls.innerHTML = '';
 
-    if (type === 'pick') runPickGame();
-    else if (type === 'help') runHelpGame();
-    else if (type === 'work') runWorkGame();
-    else {
+    var generation = ++rescueGeneration;
+    rescueStepPending = true;
+    gameTitle.textContent = 'ゲームを準備しています…';
+    rescueRequest('rescue-start', { type: type }).then(function(data) {
+        if (generation !== rescueGeneration) return;
+        rescueState = data;
+        rescueState.receivedAt = performance.now();
+        rescueStepPending = false;
+        if (type === 'pick') runPickGame();
+        else if (type === 'help') runHelpGame();
+        else if (type === 'work') runWorkGame();
+        focusGameControl();
+    }).catch(function() {
+        if (generation !== rescueGeneration) return;
         cancelRescueGame(false);
-        setRescueStatus('ゲームを選び直してください。');
-        return;
-    }
-    window.setTimeout(focusGameControl, 0);
+        setRescueStatus('ゲームを開始できませんでした。もう一度試してね。');
+    });
 }
 
 function cancelRescueGame(restoreMenuFocus) {
+    rescueGeneration++;
+    rescueState = null;
+    rescueStepPending = false;
     if (activeInterval) window.clearInterval(activeInterval);
     if (activeTimeout) window.clearTimeout(activeTimeout);
     activeInterval = null;
@@ -141,7 +187,7 @@ function showRetryButton(label, restart) {
     button.addEventListener('click', function() {
         gameCanvas.innerHTML = '';
         gameControls.innerHTML = '';
-        restart();
+        showRescueGame(restart === runPickGame ? 'pick' : restart === runHelpGame ? 'help' : 'work');
         focusGameControl();
     });
     gameControls.appendChild(button);
@@ -186,13 +232,16 @@ function runPickGame() {
         ball.style.setProperty('--ball-y', (28 + Math.floor(Math.random() * (maxY - 27))) + 'px');
         ball.addEventListener('click', function() {
             if (score >= goal || secondsLeft <= 0) return;
+            if (rescueStepPending) return;
+            rescueStep(isGold ? 'gold' : 'silver', function(data) {
             combo++;
-            score = Math.min(goal, score + (isGold ? 2 : 1));
+            score = Math.min(goal, data.score);
             hud.update(score, secondsLeft);
             gameTitle.textContent = combo >= 3 ? 'コンボ！いい調子！' : '銀玉を集めよう！';
             ball.remove();
             if (score >= goal) completeMiniGame('pick', 'フィーバー！銀玉を集めきった！');
             else spawnBall();
+            });
         });
         gameCanvas.appendChild(ball);
     }
@@ -263,12 +312,7 @@ function runHelpGame() {
     });
     gameControls.appendChild(bins);
 
-    for (var i = items.length - 1; i > 0; i--) {
-        var swapIndex = Math.floor(Math.random() * (i + 1));
-        var temp = items[i];
-        items[i] = items[swapIndex];
-        items[swapIndex] = temp;
-    }
+    items = rescueState.order.map(function(index) { return items[index]; });
 
     var currentIndex = 0;
     var changingItem = false;
@@ -281,8 +325,8 @@ function runHelpGame() {
     bins.addEventListener('click', function(event) {
         var button = event.target.closest('[data-category]');
         if (!button || changingItem || secondsLeft <= 0 || progress >= goal) return;
-
-        if (button.getAttribute('data-category') === items[currentIndex].category) {
+        rescueStep(button.getAttribute('data-category'), function(data) {
+        if (data.score > progress) {
             progress++;
             combo++;
             hud.update(progress, secondsLeft);
@@ -311,6 +355,7 @@ function runHelpGame() {
             gameTitle.textContent = 'おしい！分別を確認してね（ミス ' + mistakes + '回）';
             if (secondsLeft === 0) endSortingGame();
         }
+        });
     });
     showItem();
 
@@ -349,8 +394,8 @@ function runWorkGame() {
         var zone = document.createElement('div');
         zone.className = 'rescue-work-zone';
         var zoneWidth = Math.max(36, 78 - (round - 1) * 16);
-        var railWidth = rail.clientWidth || 230;
-        var zoneLeft = Math.floor(Math.random() * Math.max(1, railWidth - zoneWidth));
+        var railWidth = 230;
+        var zoneLeft = rescueState.zoneLeft;
         zone.style.setProperty('--zone-left', zoneLeft + 'px');
         zone.style.setProperty('--zone-width', zoneWidth + 'px');
         zone.textContent = 'HIT!';
@@ -368,13 +413,12 @@ function runWorkGame() {
 
         var stopButton = makeRescueButton('ストップ！', 'rescue-stop-button');
         var pos = 0;
-        var direction = 1;
         var speed = 3 + (round - 1) * 1.4;
         var maxPosition = Math.max(0, railWidth - 18);
+        var roundStart = rescueState.receivedAt + rescueState.startedAt - rescueState.serverTime;
         activeInterval = window.setInterval(function() {
-            pos += speed * direction;
-            if (pos >= maxPosition) { pos = maxPosition; direction = -1; }
-            if (pos <= 0) { pos = 0; direction = 1; }
+            var travel = Math.max(0, performance.now() - roundStart) / 16 * speed % (maxPosition * 2);
+            pos = travel <= maxPosition ? travel : maxPosition * 2 - travel;
             cursor.style.setProperty('--cursor-x', pos + 'px');
         }, 16);
 
@@ -382,7 +426,8 @@ function runWorkGame() {
             if (activeInterval) window.clearInterval(activeInterval);
             activeInterval = null;
             stopButton.disabled = true;
-            if (pos + 7 >= zoneLeft && pos + 7 <= zoneLeft + zoneWidth) {
+            rescueStep('stop', function(data) {
+            if (data.round > round) {
                 stopButton.classList.add('is-success');
                 stopButton.textContent = 'ジャスト！';
                 feedback.textContent = '成功！';
@@ -405,6 +450,7 @@ function runWorkGame() {
                     focusGameControl();
                 }, 850);
             }
+            });
         });
         gameControls.appendChild(stopButton);
     }
@@ -442,7 +488,7 @@ function finishRescue(type) {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json'
         },
-        body: 'action=rescue&type=' + encodeURIComponent(type)
+        body: 'action=rescue&type=' + encodeURIComponent(type) + '&token=' + encodeURIComponent(rescueState ? rescueState.token : '')
     })
     .then(function(response) {
         if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -454,7 +500,7 @@ function finishRescue(type) {
         if (data.success) {
             cancelRescueGame(false);
             setRescueStatus('救済の玉を受け取りました。');
-        } else if (data.balls != null && !/^0+$/.test(String(data.balls).replace(/[^0-9]/g, ''))) {
+        } else if (data.balls != null && BigInt(data.balls) >= 10n) {
             cancelRescueGame(false);
             setRescueStatus('玉数を更新しました。ゲームを続けられます。');
         } else {

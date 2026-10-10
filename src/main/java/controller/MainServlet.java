@@ -29,6 +29,8 @@ public class MainServlet extends HttpServlet {
         if ("true".equals(request.getParameter("reset"))) {
             session.invalidate();
             session = request.getSession(true);
+            response.sendRedirect(request.getContextPath() + "/main");
+            return;
         }
 
         Pet pet = (Pet) session.getAttribute("pet");

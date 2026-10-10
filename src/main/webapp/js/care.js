@@ -118,6 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(function(data) {
+                    currentBalls = BigInt(data.balls);
+                    renderStatus(data.level, data.exp, data.nextExp);
                     if (!data.success) {
                         showBubble(button, data.error === 'invalid_count' ? '個数を確認してね！' : '玉が足りないよ！');
                         return;
@@ -125,8 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.record && typeof window.updateDashboardRecord === 'function') {
                         window.updateDashboardRecord(data.record);
                     }
-                    currentBalls = BigInt(data.balls);
-                    renderStatus(data.level, data.exp, data.nextExp);
                     if (data.level >= 100) window.showFinalEvolutionChoice();
                     else if (data.evolved) showEvolution(data);
                 })

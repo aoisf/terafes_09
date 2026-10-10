@@ -3,6 +3,8 @@ package controller;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Random;
+import java.io.Serializable;
+import java.util.UUID;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,6 +25,42 @@ public class GameActionServlet extends HttpServlet {
     private static final int[] SLOT_BASE_PAYOUTS = { 100, 200, 300, 500 };
     private final Random random = new Random();
     private final PetCareLogic petCareLogic = new PetCareLogic();
+    private static final String RESCUE_GAME_ATTRIBUTE = "rescueGame";
+
+    /** 一回の救済挑戦。進捗と使い捨ての操作トークンをサーバーで保持する。 */
+    private static class RescueGame implements Serializable {
+        private static final long serialVersionUID = 1L;
+        final String type;
+        final int[] order = {0, 1, 2, 3, 4, 5, 6, 7};
+        long deadline;
+        long roundStartedAt;
+        int score;
+        int pickups;
+        int round = 1;
+        int zoneLeft;
+        String token = UUID.randomUUID().toString();
+        RescueGame(String type, Random random) {
+            this.type = type;
+            deadline = System.currentTimeMillis() + ("pick".equals(type) ? 18_000 : "help".equals(type) ? 25_000 : 300_000);
+            for (int i = order.length - 1; i > 0; i--) {
+                int j = random.nextInt(i + 1);
+                int value = order[i]; order[i] = order[j]; order[j] = value;
+            }
+            startRound(random);
+        }
+        void startRound(Random random) {
+            zoneLeft = random.nextInt(230 - zoneWidth() + 1);
+            roundStartedAt = System.currentTimeMillis() + 500;
+        }
+        int zoneWidth() { return Math.max(36, 78 - (round - 1) * 16); }
+        boolean complete() { return "work".equals(type) ? round > 3 : score >= 8; }
+        String toJson() {
+            return "{\"token\":\"" + token + "\",\"score\":" + score + ",\"round\":" + round
+                    + ",\"zoneLeft\":" + zoneLeft + ",\"zoneWidth\":" + zoneWidth()
+                    + ",\"startedAt\":" + roundStartedAt + ",\"serverTime\":" + System.currentTimeMillis()
+                    + ",\"complete\":" + complete() + ",\"order\":" + java.util.Arrays.toString(order) + "}";
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -49,7 +87,66 @@ public class GameActionServlet extends HttpServlet {
         boolean isHit = false;
         boolean canPlay = false;
 
-        // 救済アクション（玉が0のときのミニゲーム報酬）
+        if ("rescue-start".equals(action) || "rescue-step".equals(action)) {
+            response.setContentType("application/json; charset=UTF-8");
+            synchronized (pet) {
+                if (pet.getBalls().compareTo(BigInteger.TEN) >= 0) {
+                    response.sendError(HttpServletResponse.SC_CONFLICT); return;
+                }
+                RescueGame game;
+                if ("rescue-start".equals(action)) {
+                    String type = request.getParameter("type");
+                    if (!("pick".equals(type) || "help".equals(type) || "work".equals(type))) {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
+                    }
+                    game = new RescueGame(type, random);
+                    session.setAttribute(RESCUE_GAME_ATTRIBUTE, game);
+                } else {
+                    game = (RescueGame) session.getAttribute(RESCUE_GAME_ATTRIBUTE);
+                    long now = System.currentTimeMillis();
+                    if (game == null || game.complete() || now > game.deadline
+                            || !game.token.equals(request.getParameter("token"))) {
+                        response.sendError(HttpServletResponse.SC_CONFLICT); return;
+                    }
+                    if ("pick".equals(game.type)) {
+                        // 金玉は4個目ごとに2ポイント。
+                        String expected = (game.pickups + 1) % 4 == 0 ? "gold" : "silver";
+                        if (!expected.equals(request.getParameter("answer"))) {
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
+                        }
+                        game.score += ++game.pickups % 4 == 0 ? 2 : 1;
+                    } else if ("help".equals(game.type)) {
+                        int item = game.order[game.score];
+                        String expected = item < 3 ? "recycle" : item < 6 ? "burn" : "other";
+                        if (expected.equals(request.getParameter("answer"))) game.score++;
+                        else game.deadline -= 3_000;
+                    } else {
+                        if (!"stop".equals(request.getParameter("answer"))) {
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST); return;
+                        }
+                        double speed = 3 + (game.round - 1) * 1.4;
+                        boolean hit = false;
+                        // 通信遅延分の小さな許容幅を含め、サーバー時刻で目押しを判定。
+                        for (long lag = 0; lag <= 120; lag += 16) {
+                            long elapsed = now - game.roundStartedAt - lag;
+                            if (elapsed < 0) continue;
+                            double travel = elapsed / 16.0 * speed % 424;
+                            double position = (travel <= 212 ? travel : 424 - travel) + 7;
+                            if (position >= game.zoneLeft && position <= game.zoneLeft + game.zoneWidth()) hit = true;
+                        }
+                        if (hit) game.round++;
+                        game.startRound(random);
+                    }
+                    game.token = UUID.randomUUID().toString();
+                    // 時間内にクリアできれば、報酬の受け取り通信には別の猶予を設ける。
+                    if (game.complete()) game.deadline = now + 30_000;
+                }
+                response.getWriter().write(game.toJson());
+            }
+            return;
+        }
+
+        // 救済アクション（10発未満でミニゲームを完了したときの報酬）
         if ("rescue".equals(action)) {
             String type = request.getParameter("type");
             long reward = 0;
@@ -59,11 +156,16 @@ public class GameActionServlet extends HttpServlet {
 
             boolean success = false;
             synchronized (pet) {
-                if (reward > 0 && pet.getBalls().signum() == 0
+                RescueGame game = (RescueGame) session.getAttribute(RESCUE_GAME_ATTRIBUTE);
+                if (reward > 0 && pet.getBalls().compareTo(BigInteger.TEN) < 0
+                        && game != null && game.type.equals(type) && game.complete()
+                        && game.token.equals(request.getParameter("token"))
+                        && System.currentTimeMillis() <= game.deadline
                         && !Boolean.TRUE.equals(session.getAttribute(RESCUE_CLAIMED_ATTRIBUTE))) {
                     petCareLogic.addRescueBalls(pet, reward);
                     session.setAttribute(RESCUE_CLAIMED_ATTRIBUTE, Boolean.TRUE);
                     success = true;
+                    session.removeAttribute(RESCUE_GAME_ATTRIBUTE);
                 }
             }
 
@@ -85,7 +187,7 @@ public class GameActionServlet extends HttpServlet {
 
         synchronized (pet) {
             // 玉が残っている状態で通常操作に入ったら、次の0発到達時の救済を再度許可する。
-            if (pet.getBalls().signum() > 0) {
+            if (pet.getBalls().compareTo(BigInteger.TEN) >= 0) {
                 session.removeAttribute(RESCUE_CLAIMED_ATTRIBUTE);
             }
 

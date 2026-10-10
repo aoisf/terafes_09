@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/care.js?v=11" defer></script>
+    <script src="${pageContext.request.contextPath}/js/care.js?v=12" defer></script>
     <script src="${pageContext.request.contextPath}/js/image-preview.js?v=1" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=1" data-context="${pageContext.request.contextPath}" defer></script>
 </body>

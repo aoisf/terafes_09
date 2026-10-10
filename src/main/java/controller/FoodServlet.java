@@ -84,7 +84,7 @@ public class FoodServlet extends HttpServlet {
             invalidCount = true;
         }
         synchronized (pet) {
-            if (pet.getBalls().signum() > 0) {
+            if (pet.getBalls().compareTo(BigInteger.TEN) >= 0) {
                 session.removeAttribute("rescueClaimed");
             }
             evolutionFrom = pet.getEvolutionLevel();
