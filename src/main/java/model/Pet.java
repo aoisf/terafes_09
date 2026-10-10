@@ -24,7 +24,7 @@ public class Pet implements Serializable {
 
     public int getLevel() { return level; }
     public void setLevel(int level) {
-        if (this.level < 10 && level >= 10) this.outfitId = "normal";
+        if (getEvolutionLevelFor(level) > getEvolutionLevel()) this.outfitId = "normal";
         this.level = level;
     }
 
@@ -45,8 +45,12 @@ public class Pet implements Serializable {
         return getOutfitImageFor(getOutfitId());
     }
     public String getOutfitImageFor(String outfit) {
-        String stage = level >= 10 ? "lv10" : "lv1";
+        String stage = "lv" + getEvolutionLevel();
         return "normal".equals(outfit) ? stage + ".png" : stage + "-" + outfit + ".png";
+    }
+    public int getEvolutionLevel() { return getEvolutionLevelFor(level); }
+    public static int getEvolutionLevelFor(int level) {
+        return level >= 20 ? 20 : level >= 10 ? 10 : 1;
     }
     public String getOutfitName() {
         return switch (getOutfitId()) {
