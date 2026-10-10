@@ -5,8 +5,44 @@
 
     var autoToggle = document.getElementById('auto-toggle');
     var defaultAuto = document.getElementById('default-auto-setting');
+    var encyclopedia = dashboard.querySelector('[data-dialog="encyclopedia"]');
+    var encyclopediaList = encyclopedia && encyclopedia.querySelector('[data-encyclopedia-list]');
+    var lastEncyclopediaTrigger = null;
     var storageKey = 'pachipet.autoDefault';
     var lastTrigger = null;
+    var backgroundMilestones = [
+        { id: 'forest', name: '森', threshold: 100 },
+        { id: 'pool', name: 'プール', threshold: 500 },
+        { id: 'pacific', name: '太平洋', threshold: 2500 },
+        { id: 'space', name: '宇宙', threshold: 12500 }
+    ];
+
+    function showEncyclopediaList() {
+        if (!encyclopediaList) return;
+        encyclopediaList.hidden = false;
+        encyclopedia.querySelectorAll('[data-encyclopedia-detail]').forEach(function(detail) { detail.hidden = true; });
+    }
+
+    if (encyclopediaList) {
+        encyclopediaList.querySelectorAll('[data-encyclopedia-entry]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var entry = button.getAttribute('data-encyclopedia-entry');
+                var detail = encyclopedia.querySelector('[data-encyclopedia-detail="' + entry + '"]');
+                if (!detail) return;
+                lastEncyclopediaTrigger = button;
+                encyclopediaList.hidden = true;
+                detail.hidden = false;
+                var back = detail.querySelector('[data-encyclopedia-back]');
+                if (back) back.focus();
+            });
+        });
+        encyclopedia.querySelectorAll('[data-encyclopedia-back]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                showEncyclopediaList();
+                if (lastEncyclopediaTrigger) lastEncyclopediaTrigger.focus();
+            });
+        });
+    }
 
     function saveAutoDefault(enabled) {
         if (defaultAuto) defaultAuto.checked = enabled;
@@ -55,38 +91,37 @@
             if (value) value.textContent = values[key].toLocaleString();
         });
 
-        var achievements = {
-            firstSpin: spins > 0,
-            firstJackpot: jackpots > 0,
-            regular: totalActions >= 50
-        };
-        Object.keys(achievements).forEach(function(key) {
-            var card = dashboard.querySelector('[data-achievement="' + key + '"]');
-            if (!card) return;
-            card.classList.toggle('is-achieved', achievements[key]);
-            var state = card.querySelector('[data-achievement-state]');
-            if (state) state.textContent = achievements[key] ? '達成' : '未達成';
+        backgroundMilestones.forEach(function(milestone) {
+            var unlocked = totalActions >= milestone.threshold;
+            var card = dashboard.querySelector('[data-background-achievement="' + milestone.id + '"]');
+            if (card) {
+                card.classList.toggle('is-achieved', unlocked);
+                var state = card.querySelector('[data-background-achievement-state]');
+                if (state) state.textContent = unlocked ? '獲得済み' : '未獲得';
+                var progress = card.querySelector('[data-background-progress="' + milestone.id + '"]');
+                if (progress) progress.textContent = Math.min(totalActions, milestone.threshold).toLocaleString() + '/' + milestone.threshold.toLocaleString() + '回';
+            }
         });
 
-        var unlocked = totalActions >= 100;
-        var percent = Math.min(100, Math.floor(totalActions / 100 * 100));
+        var forestUnlocked = totalActions >= backgroundMilestones[0].threshold;
         var background = dashboard.querySelector('.background-unlock');
         var backgroundCopy = dashboard.querySelector('[data-background-copy]');
-        var backgroundState = dashboard.querySelector('[data-background-state]');
-        if (background) background.classList.toggle('is-unlocked', unlocked);
+        if (background) background.classList.toggle('is-unlocked', forestUnlocked);
         dashboard.querySelectorAll('[data-background-choice]').forEach(function(button) {
-            button.disabled = !unlocked;
+            var threshold = Number(button.getAttribute('data-background-threshold')) || 0;
+            button.disabled = threshold > 0 && totalActions < threshold;
         });
+        var nextMilestone = backgroundMilestones.find(function(milestone) { return totalActions < milestone.threshold; });
         if (backgroundCopy) {
-            backgroundCopy.textContent = unlocked
-                ? '通常の部屋と森を選べます。'
-                : '総操作100回で背景変更枠が解放されます。現在 ' + percent + '%';
+            backgroundCopy.textContent = nextMilestone
+                ? '次は「' + nextMilestone.name + '」を獲得できます。あと ' + (nextMilestone.threshold - totalActions).toLocaleString() + ' 回です。'
+                : 'すべての背景を獲得済みです。';
         }
-        if (backgroundState) backgroundState.textContent = unlocked ? '解放済み' : 'LOCKED';
     };
 
     function closeDialog(dialog) {
         if (!dialog) return;
+        if (dialog === encyclopedia) showEncyclopediaList();
         dialog.hidden = true;
         document.body.classList.remove('dashboard-dialog-open');
         if (lastTrigger) lastTrigger.focus();
@@ -145,7 +180,14 @@
     document.addEventListener('keydown', function(event) {
         if (event.key !== 'Escape') return;
         var openedDialog = dashboard.querySelector('[data-dialog]:not([hidden])');
-        if (openedDialog) closeDialog(openedDialog);
+        if (openedDialog === encyclopedia && encyclopediaList && encyclopediaList.hidden) {
+            showEncyclopediaList();
+            if (lastEncyclopediaTrigger) lastEncyclopediaTrigger.focus();
+            event.preventDefault();
+            event.stopPropagation();
+        } else if (openedDialog) {
+            closeDialog(openedDialog);
+        }
     });
 
     var resetButton = dashboard.querySelector('[data-reset-game]');

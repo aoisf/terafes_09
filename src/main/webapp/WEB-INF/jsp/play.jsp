@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>あそぶ - パチペット生活</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/play.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=1">
 </head>
 <body>
     <div class="app-container page-play care-page"
@@ -28,9 +29,12 @@
                     for (CareItem item : items) {
             %>
                 <div class="care-card play-card" data-cost="<%= item.cost().toString() %>" data-id="<%= item.id() %>">
-                    <div class="item-info">
-                        <span class="item-name"><%= item.name() %></span>
-                        <span class="item-meta">1回消費: <%= String.format(java.util.Locale.JAPAN, "%,d", item.cost()) %> 発 / 獲得EXP: +<%= String.format(java.util.Locale.JAPAN, "%,d", item.expGain()) %></span>
+                    <div class="item-summary">
+                        <img class="care-item-icon" src="${pageContext.request.contextPath}/images/pets/tamagoro/care/<%= item.id() %>.png" alt="">
+                        <div class="item-info">
+                            <span class="item-name"><%= item.name() %></span>
+                            <span class="item-meta">1回消費: <%= String.format(java.util.Locale.JAPAN, "%,d", item.cost()) %> 発 / 獲得EXP: +<%= String.format(java.util.Locale.JAPAN, "%,d", item.expGain()) %></span>
+                        </div>
                     </div>
                     <div class="action-box">
                         <span class="affordable-count">あそべる数: <strong class="count-val">0</strong></span>
@@ -55,5 +59,6 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/js/care.js?v=1" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=1" defer></script>
 </body>
 </html>

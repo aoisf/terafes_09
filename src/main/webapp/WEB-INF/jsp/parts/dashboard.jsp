@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="model.PetCareLogic" %>
 <div class="dashboard-ui" id="dashboard-ui"
      data-reset-url="${pageContext.request.contextPath}/main?reset=true"
      data-background-url="${pageContext.request.contextPath}/background">
@@ -13,11 +14,15 @@
         </button>
         <button class="dashboard-nav-button" type="button" data-open-dialog="records" aria-haspopup="dialog">
             <svg class="dashboard-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11h4v9H4Zm6 0V5h4v15h-4Zm6 0v-7h4v7h-4ZM3 4h18"/></svg>
-            <span>プレイ記録</span>
+            <span>記録</span>
         </button>
         <button class="dashboard-nav-button" type="button" data-open-dialog="achievements" aria-haspopup="dialog">
             <svg class="dashboard-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Zm0 2H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4m-4 2v4m-4 2h8m-8-6h8v6H8z"/></svg>
             <span>実績</span>
+        </button>
+        <button class="dashboard-nav-button" type="button" data-open-dialog="background" aria-haspopup="dialog">
+            <svg class="dashboard-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM4 16l5-5 3 3 3-4 5 6M8 9h.01"/></svg>
+            <span>背景</span>
         </button>
     </header>
 
@@ -27,12 +32,81 @@
                 <div><p class="dashboard-eyebrow">TAMAGORO FILE</p><h2 id="encyclopedia-title">ちいさな図鑑</h2></div>
                 <button class="dashboard-close" type="button" data-close-dialog aria-label="閉じる">×</button>
             </div>
-            <div class="encyclopedia-grid">
-                <article class="encyclopedia-card"><span class="encyclopedia-mark">た</span><div><h3>たまごろう</h3><p>銀玉の音に誘われてやってきた、好奇心いっぱいのたまごろう。</p></div></article>
-                <article class="encyclopedia-card"><span class="encyclopedia-mark">食</span><div><h3>ごはん</h3><p>玉を使ってごはんをあげると、経験値を獲得できるよ。</p></div></article>
-                <article class="encyclopedia-card"><span class="encyclopedia-mark">遊</span><div><h3>あそぶ</h3><p>遊びながら経験値を獲得。まとめて遊ぶこともできるよ。</p></div></article>
-                <article class="encyclopedia-card"><span class="encyclopedia-mark">着</span><div><h3>おきがえ</h3><p>今はお気に入りの姿で待機中。新しい着替えはこれから追加予定。</p></div></article>
+            <div class="encyclopedia-grid" data-encyclopedia-list>
+                <button class="encyclopedia-card" type="button" data-encyclopedia-entry="tamagoro">
+                    <span class="encyclopedia-mark">た</span><span class="encyclopedia-copy"><strong>たまごろう</strong><span>銀玉の音に誘われてやってきた、好奇心いっぱいのたまごろう。</span></span><span class="encyclopedia-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="encyclopedia-card" type="button" data-encyclopedia-entry="food">
+                    <span class="encyclopedia-mark">食</span><span class="encyclopedia-copy"><strong>ごはん</strong><span>玉を使ってごはんをあげると、経験値を獲得できるよ。</span></span><span class="encyclopedia-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="encyclopedia-card" type="button" data-encyclopedia-entry="play">
+                    <span class="encyclopedia-mark">遊</span><span class="encyclopedia-copy"><strong>あそぶ</strong><span>遊びながら経験値を獲得。まとめて遊ぶこともできるよ。</span></span><span class="encyclopedia-arrow" aria-hidden="true">›</span>
+                </button>
+                <button class="encyclopedia-card" type="button" data-encyclopedia-entry="outfits">
+                    <span class="encyclopedia-mark">着</span><span class="encyclopedia-copy"><strong>おきがえ</strong><span>気分に合わせて、たまごろうの衣装を選ぼう。</span></span><span class="encyclopedia-arrow" aria-hidden="true">›</span>
+                </button>
             </div>
+            <section class="encyclopedia-entry-detail" data-encyclopedia-detail="tamagoro" aria-labelledby="encyclopedia-tamagoro-title" hidden>
+                <button class="encyclopedia-back" type="button" data-encyclopedia-back>‹ 図鑑にもどる</button>
+                <div class="encyclopedia-entry-content">
+                    <img class="encyclopedia-entry-image pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/lv1.png" alt="たまごろうの卵">
+                    <div><p class="encyclopedia-entry-no">No.001 · たまごろう</p><h3 id="encyclopedia-tamagoro-title">たまごろう</h3><p class="encyclopedia-flavor">銀玉の音を聞きつけて現れた、好奇心旺盛な卵。殻の中身はまだ秘密。本人も知らないらしい。</p></div>
+                </div>
+            </section>
+            <section class="encyclopedia-entry-detail" data-encyclopedia-detail="food" aria-labelledby="encyclopedia-food-title" hidden>
+                <button class="encyclopedia-back" type="button" data-encyclopedia-back>‹ 図鑑にもどる</button>
+                <div class="encyclopedia-entry-heading">
+                    <p class="encyclopedia-entry-no">No.002 · ごはん</p><h3 id="encyclopedia-food-title">ごはん</h3>
+                    <p class="encyclopedia-flavor">食べると経験値が増える。高級メニューほど、食べる前から目が輝く。</p>
+                </div>
+                <div class="encyclopedia-catalog-grid" aria-label="ごはん全10種類">
+                    <% String[] foodNotes = {"まずはこれ。迷ったらカリカリ、たまごろうも迷わない。", "余った玉が乳酸菌に変身。お腹もお財布もびっくり。", "勝負の前にひと皿。勝敗より先に香りで元気が出る。", "A5ランクのごちそう。食べる姿まで少し上品に見える。", "金ぴかだけど食べられる。歯みがきのことはあとで考える。", "秘伝の鍋でぐつぐつ。湯気の向こうに明日の元気が見える。", "小さな粒にプラチナ級の期待。ひと粒ずつ大切にどうぞ。", "味の感想は難しい。たまごろうは黙って完食した。", "宇宙規模のうまみをぎゅっと凝縮。スプーンも浮きそう。", "究極のゼリー。食べたあとの感想は『おかわり』らしい。"}; int foodIndex = 0; for (PetCareLogic.CareItem item : PetCareLogic.FOOD_ITEMS) { %>
+                    <article class="encyclopedia-catalog-card">
+                        <img class="encyclopedia-catalog-image pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/care/<%= item.id() %>.png" alt="">
+                        <div><h4><%= item.name() %></h4><p><%= foodNotes[foodIndex++] %></p></div>
+                    </article>
+                    <% } %>
+                </div>
+            </section>
+            <section class="encyclopedia-entry-detail" data-encyclopedia-detail="play" aria-labelledby="encyclopedia-play-title" hidden>
+                <button class="encyclopedia-back" type="button" data-encyclopedia-back>‹ 図鑑にもどる</button>
+                <div class="encyclopedia-entry-heading">
+                    <p class="encyclopedia-entry-no">No.003 · あそぶ</p><h3 id="encyclopedia-play-title">あそぶ</h3>
+                    <p class="encyclopedia-flavor">遊ぶほど経験値が増える。まとめて遊ぶと、先に息切れするのはだいたい飼い主。</p>
+                </div>
+                <div class="encyclopedia-catalog-grid" aria-label="あそび全10種類">
+                    <% String[] playNotes = {"まずはじゃんけん。勝つと嬉しい、負けても経験値は嬉しい。", "銀玉を磨く遊び。気づくとたまごろうより玉がぴかぴか。", "ハンドルを固定して練習。真剣な顔だけはプロ級。", "実機を解体して仕組みを研究。戻すところまでが遊びです。", "ドル箱を高く積もう。崩れても片付け競争に早変わり。", "みんなでフィーバー。盛り上がりすぎて休憩を忘れがち。", "重力子を加速する不思議な遊び。説明書はたぶん宇宙にある。", "恒星系をまたいで大会開催。集合時間は光より早めに。", "因果律まで書き換えるスロットル。昨日の負けもなかったことに？", "多元宇宙を巻き込む大遊び。帰り道はひとつに決めてね。"}; int playIndex = 0; for (PetCareLogic.CareItem item : PetCareLogic.PLAY_ITEMS) { %>
+                    <article class="encyclopedia-catalog-card">
+                        <img class="encyclopedia-catalog-image pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/care/<%= item.id() %>.png" alt="">
+                        <div><h4><%= item.name() %></h4><p><%= playNotes[playIndex++] %></p></div>
+                    </article>
+                    <% } %>
+                </div>
+            </section>
+            <section class="encyclopedia-entry-detail" data-encyclopedia-detail="outfits" aria-labelledby="encyclopedia-outfits-title" hidden>
+                <button class="encyclopedia-back" type="button" data-encyclopedia-back>‹ 図鑑にもどる</button>
+                <div class="encyclopedia-entry-heading">
+                    <p class="encyclopedia-entry-no">No.004 · おきがえ</p><h3 id="encyclopedia-outfits-title">おきがえ</h3>
+                </div>
+                <div class="encyclopedia-outfit-grid" aria-label="たまごろうの衣装4種類">
+                    <article class="encyclopedia-outfit-card">
+                        <span class="encyclopedia-outfit-icon encyclopedia-outfit-icon--empty" aria-hidden="true"></span>
+                        <div><h4>ふつう</h4><p>たまごろうのいつもの姿。</p></div>
+                    </article>
+                    <article class="encyclopedia-outfit-card">
+                        <img class="encyclopedia-outfit-icon pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/outfits/happi.png" alt="">
+                        <div><h4>パチンコ法被</h4><p>お祭り気分で、今日の運も呼び込み中。</p></div>
+                    </article>
+                    <article class="encyclopedia-outfit-card">
+                        <img class="encyclopedia-outfit-icon pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/outfits/sunglasses.png" alt="">
+                        <div><h4>サングラス</h4><p>視線はクール。中身はいつもの好奇心。</p></div>
+                    </article>
+                    <article class="encyclopedia-outfit-card">
+                        <img class="encyclopedia-outfit-icon pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/outfits/school-swimsuit.png" alt="">
+                        <div><h4>水着</h4><p>水泳の準備は万全。まずは陸でポーズ。</p></div>
+                    </article>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -79,41 +153,74 @@
                 <button class="dashboard-close" type="button" data-close-dialog aria-label="閉じる">×</button>
             </div>
             <div class="achievement-list">
-                <article class="achievement-card ${playRecord.firstSpinAchieved ? 'is-achieved' : ''}" data-achievement="firstSpin">
-                    <span class="achievement-seal">1</span><div><h3>はじめての一回転</h3><p>パチンコを1回遊ぶ</p></div><strong data-achievement-state>${playRecord.firstSpinAchieved ? '達成' : '未達成'}</strong>
+                <article class="achievement-card ${playRecord.forestUnlocked ? 'is-achieved' : ''}" data-background-achievement="forest" data-background-threshold="100">
+                    <span class="achievement-seal">森</span><div><h3>森の背景</h3><p>総操作100回 <small data-background-progress="forest">現在 ${playRecord.formattedTotalActions}回</small></p></div><strong data-background-achievement-state="forest">${playRecord.forestUnlocked ? '獲得済み' : '未獲得'}</strong>
                 </article>
-                <article class="achievement-card ${playRecord.firstJackpotAchieved ? 'is-achieved' : ''}" data-achievement="firstJackpot">
-                    <span class="achievement-seal">★</span><div><h3>フィーバー！</h3><p>大当たりを引く</p></div><strong data-achievement-state>${playRecord.firstJackpotAchieved ? '達成' : '未達成'}</strong>
+                <article class="achievement-card ${playRecord.poolUnlocked ? 'is-achieved' : ''}" data-background-achievement="pool" data-background-threshold="500">
+                    <span class="achievement-seal">水</span><div><h3>プールの背景</h3><p>総操作500回 <small data-background-progress="pool">現在 ${playRecord.formattedTotalActions}回</small></p></div><strong data-background-achievement-state="pool">${playRecord.poolUnlocked ? '獲得済み' : '未獲得'}</strong>
                 </article>
-                <article class="achievement-card ${playRecord.regularAchieved ? 'is-achieved' : ''}" data-achievement="regular">
-                    <span class="achievement-seal">50</span><div><h3>常連さん</h3><p>総操作回数 50回</p></div><strong data-achievement-state>${playRecord.regularAchieved ? '達成' : '未達成'}</strong>
+                <article class="achievement-card ${playRecord.pacificUnlocked ? 'is-achieved' : ''}" data-background-achievement="pacific" data-background-threshold="2500">
+                    <span class="achievement-seal">海</span><div><h3>太平洋の背景</h3><p>総操作2,500回 <small data-background-progress="pacific">現在 ${playRecord.formattedTotalActions}回</small></p></div><strong data-background-achievement-state="pacific">${playRecord.pacificUnlocked ? '獲得済み' : '未獲得'}</strong>
+                </article>
+                <article class="achievement-card ${playRecord.spaceUnlocked ? 'is-achieved' : ''}" data-background-achievement="space" data-background-threshold="12500">
+                    <span class="achievement-seal">宇宙</span><div><h3>宇宙の背景</h3><p>総操作12,500回 <small data-background-progress="space">現在 ${playRecord.formattedTotalActions}回</small></p></div><strong data-background-achievement-state="space">${playRecord.spaceUnlocked ? '獲得済み' : '未獲得'}</strong>
                 </article>
             </div>
             <section class="background-unlock ${playRecord.backgroundUnlocked ? 'is-unlocked' : ''}" aria-label="背景カスタマイズ枠">
                 <div class="background-unlock-copy">
                     <p class="dashboard-eyebrow">ROOM CUSTOMIZE</p>
-                    <h3>育成ルーム背景</h3>
-                    <p data-background-copy>${playRecord.backgroundUnlocked ? '通常の部屋と森を選べます。' : '総操作100回で「森」が解放されます。現在 '}${playRecord.backgroundUnlocked ? '' : playRecord.backgroundProgressPercent}${playRecord.backgroundUnlocked ? '' : '%'}</p>
+                    <h3>背景コレクション</h3>
+                    <p>背景メニューから獲得済みの背景を選べます。</p>
                 </div>
-                <div class="background-options" aria-label="背景を選択">
-                    <button class="background-option ${playRecord.selectedBackground == 'room' ? 'is-selected' : ''}"
-                            type="button" data-background-choice="room" aria-pressed="${playRecord.selectedBackground == 'room'}"
-                            data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/room.png"
-                            ${playRecord.backgroundUnlocked ? '' : 'disabled'}>
-                        <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/room.png" alt="">
-                        <span>部屋 <small>いつもの背景</small></span>
-                    </button>
-                    <button class="background-option ${playRecord.selectedBackground == 'forest' ? 'is-selected' : ''}"
-                            type="button" data-background-choice="forest" aria-pressed="${playRecord.selectedBackground == 'forest'}"
-                            data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/forest.png"
-                            ${playRecord.backgroundUnlocked ? '' : 'disabled'}>
-                        <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/forest.png" alt="">
-                        <span>森 <small>100回達成報酬</small></span>
-                    </button>
-                </div>
-                <span class="background-status" data-background-state>${playRecord.backgroundUnlocked ? '解放済み' : 'LOCKED'}</span>
             </section>
-            <p class="dashboard-footnote">総操作100回で森が解放されます。背景と実績は今回の展示中のみ保持されます。</p>
+            <p class="dashboard-footnote">背景は操作回数の実績で獲得できます。獲得状況は今回の展示中のみ保持されます。</p>
+        </div>
+    </div>
+
+    <div class="dashboard-dialog" data-dialog="background" role="dialog" aria-modal="true" aria-labelledby="background-title" hidden>
+        <div class="dashboard-dialog-panel">
+            <div class="dashboard-dialog-heading">
+                <div><p class="dashboard-eyebrow">ROOM CUSTOMIZE</p><h2 id="background-title">背景を選ぶ</h2></div>
+                <button class="dashboard-close" type="button" data-close-dialog aria-label="閉じる">×</button>
+            </div>
+            <p class="background-choice-intro" data-background-copy>${playRecord.nextBackgroundMessage}</p>
+            <div class="background-options" aria-label="背景を選択">
+                <button class="background-option ${playRecord.selectedBackground == 'room' ? 'is-selected' : ''}"
+                        type="button" data-background-choice="room" aria-pressed="${playRecord.selectedBackground == 'room'}"
+                        data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/room.png">
+                    <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/room.png" alt="">
+                    <span>部屋 <small>いつもの背景</small></span>
+                </button>
+                <button class="background-option ${playRecord.selectedBackground == 'forest' ? 'is-selected' : ''}"
+                        type="button" data-background-choice="forest" data-background-threshold="100" aria-pressed="${playRecord.selectedBackground == 'forest'}"
+                        data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/forest.png"
+                        ${playRecord.forestUnlocked ? '' : 'disabled'}>
+                    <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/forest.png" alt="">
+                    <span>森 <small>100回で獲得</small></span>
+                </button>
+                <button class="background-option ${playRecord.selectedBackground == 'pool' ? 'is-selected' : ''}"
+                        type="button" data-background-choice="pool" data-background-threshold="500" aria-pressed="${playRecord.selectedBackground == 'pool'}"
+                        data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/pool.png"
+                        ${playRecord.poolUnlocked ? '' : 'disabled'}>
+                    <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/pool.png" alt="">
+                    <span>プール <small>500回で獲得</small></span>
+                </button>
+                <button class="background-option ${playRecord.selectedBackground == 'pacific' ? 'is-selected' : ''}"
+                        type="button" data-background-choice="pacific" data-background-threshold="2500" aria-pressed="${playRecord.selectedBackground == 'pacific'}"
+                        data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/pacific.png"
+                        ${playRecord.pacificUnlocked ? '' : 'disabled'}>
+                    <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/pacific.png" alt="">
+                    <span>太平洋 <small>2,500回で獲得</small></span>
+                </button>
+                <button class="background-option ${playRecord.selectedBackground == 'space' ? 'is-selected' : ''}"
+                        type="button" data-background-choice="space" data-background-threshold="12500" aria-pressed="${playRecord.selectedBackground == 'space'}"
+                        data-background-image="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/space.png"
+                        ${playRecord.spaceUnlocked ? '' : 'disabled'}>
+                    <img src="${pageContext.request.contextPath}/images/pets/tamagoro/backgrounds/space.png" alt="">
+                    <span>宇宙 <small>12,500回で獲得</small></span>
+                </button>
+            </div>
+            <p class="dashboard-footnote" data-background-state>ロック中の背景は、実績を獲得すると選べます。</p>
         </div>
     </div>
 </div>

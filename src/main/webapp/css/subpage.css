@@ -50,6 +50,27 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+.item-summary {
+    display: flex;
+    flex: 1 1 280px;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.care-item-icon {
+    display: block;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    padding: 3px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    background: rgba(255, 255, 255, .78);
+    border: 1px solid rgba(80, 80, 80, .18);
+    border-radius: 8px;
+}
+
 .item-info {
     display: flex;
     flex: 1 1 180px;
@@ -188,6 +209,16 @@
     .action-box {
         flex: 1 1 auto;
         width: 100%;
+    }
+
+    .item-summary {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .item-summary .item-info {
+        flex: 1 1 0;
+        width: auto;
     }
 
     .action-box {

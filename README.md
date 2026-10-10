@@ -57,8 +57,10 @@
 * `src/main/webapp/css/`: 共通CSS、サブ画面共通CSS、画面ごとの色や装飾。`dashboard.css` はメイン画面のヘッダーとポップアップ
 * `src/main/webapp/js/`: `control.js` はメイン操作、`care.js` はごはん・あそぶ共通操作、`pachinko.js` と `rescue.js` は演出・救済操作、`dashboard.js` は図鑑・設定・記録・実績の操作
 * `src/main/java/model/PlayRecord.java`: 展示中の操作記録、実績状態、選択中の育成ルーム背景をセッション内で保持
-* `src/main/java/controller/BackgroundServlet.java`: 100回操作達成後の育成ルーム背景変更
-* `src/main/webapp/images/`: キャラクター、育成コマンド、育成ルーム（部屋・森）の背景画像
+* `src/main/java/controller/BackgroundServlet.java`: 背景獲得後の育成ルーム背景変更
+* `src/main/webapp/images/`: キャラクター、育成コマンド、育成ルーム背景（部屋・森・プール・太平洋・宇宙）
+
+背景実績の必要操作回数は、森100回、プール500回、太平洋2,500回、宇宙12,500回です。各段階で前の背景の5倍に設定しています。
 * `build/`: Eclipseのコンパイル結果や一時ファイル。Gitには含めない
 
 JSPは `WEB-INF` 配下に置き、画面のURLは対応するServletから転送します。画面操作のJavaScriptは `js/` に置き、JSPへ長いスクリプトを直接埋め込まないようにします。

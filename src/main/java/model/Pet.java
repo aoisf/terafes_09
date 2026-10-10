@@ -10,6 +10,7 @@ public class Pet implements Serializable {
     private int level;          // LV (1 - 100)
     private BigInteger exp;     // 現在の累積EXP
     private BigInteger balls;   // 所持玉数（インフレ対応）
+    private String outfitId = "normal";
 
     public Pet() {
         this.name = "たまごろう";
@@ -29,6 +30,25 @@ public class Pet implements Serializable {
 
     public BigInteger getBalls() { return balls; }
     public void setBalls(BigInteger balls) { this.balls = balls; }
+
+    public String getOutfitId() { return outfitId == null ? "normal" : outfitId; }
+    public void setOutfitId(String outfitId) {
+        if ("normal".equals(outfitId) || "happi".equals(outfitId)
+                || "sunglasses".equals(outfitId) || "school-swimsuit".equals(outfitId)) {
+            this.outfitId = outfitId;
+        }
+    }
+    public String getOutfitImage() {
+        return "normal".equals(getOutfitId()) ? "lv1.png" : "lv1-" + getOutfitId() + ".png";
+    }
+    public String getOutfitName() {
+        return switch (getOutfitId()) {
+            case "happi" -> "パチンコ法被";
+            case "sunglasses" -> "サングラス";
+            case "school-swimsuit" -> "水着";
+            default -> "ふつう";
+        };
+    }
 
     // 次のレベルまでに必要な経験値（2のlevel乗）
     public BigInteger getNextLevelExp() {
