@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         after.className = 'evolution-after';
         stage.append(before, after);
         var message = document.createElement('p');
-        message.textContent = (data.evolutionTo >= 60 ? '殻の欠片がふわり。靄で浮かせられるようになった…！' : data.evolutionTo >= 50 ? '殻がぱかっと左右に割れて、小さな体と足が現れた…！' : data.evolutionTo >= 40 ? '丸い耳がぴょこん。黒い中身にも顔が現れた…！' : data.evolutionTo >= 30 ? '上の殻がなくなって、黒い中身が姿を現した…！' : data.evolutionTo >= 20 ? '殻が浮いて、黒い靄があふれてきた…！' : '殻の中から黒い靄が…！') + ' おきがえは「ふつう」に戻ったよ。';
+        message.textContent = (data.evolutionTo >= 70 ? '全身がふわりと靄に。きらりと光る目だけが見える…！' : data.evolutionTo >= 60 ? '殻の欠片がふわり。靄で浮かせられるようになった…！' : data.evolutionTo >= 50 ? '殻がぱかっと左右に割れて、小さな体と足が現れた…！' : data.evolutionTo >= 40 ? '丸い耳がぴょこん。黒い中身にも顔が現れた…！' : data.evolutionTo >= 30 ? '上の殻がなくなって、黒い中身が姿を現した…！' : data.evolutionTo >= 20 ? '殻が浮いて、黒い靄があふれてきた…！' : '殻の中から黒い靄が…！') + ' おきがえは「ふつう」に戻ったよ。';
         var close = document.createElement('button');
         close.type = 'button';
         close.textContent = 'やったね！';
