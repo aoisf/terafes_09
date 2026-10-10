@@ -5,6 +5,8 @@ import java.math.BigInteger;
 
 public class Pet implements Serializable {
     private static final long serialVersionUID = 1L;
+    // 実装済みの姿を昇順で管理。進化と図鑑はこの一覧を共有する。
+    private static final int[] EVOLUTION_LEVELS = {1, 10, 20, 30};
 
     private String name;
     private int level;          // LV (1 - 100)
@@ -50,8 +52,13 @@ public class Pet implements Serializable {
     }
     public int getEvolutionLevel() { return getEvolutionLevelFor(level); }
     public static int getEvolutionLevelFor(int level) {
-        return level >= 20 ? 20 : level >= 10 ? 10 : 1;
+        // 到達レベル以下で最も高い姿を選ぶ。複数段階の飛び越しにも対応。
+        for (int i = EVOLUTION_LEVELS.length - 1; i >= 0; i--) {
+            if (level >= EVOLUTION_LEVELS[i]) return EVOLUTION_LEVELS[i];
+        }
+        return EVOLUTION_LEVELS[0];
     }
+    public static int[] getEvolutionLevels() { return EVOLUTION_LEVELS.clone(); }
     public String getOutfitName() {
         return switch (getOutfitId()) {
             case "happi" -> "パチンコ法被";

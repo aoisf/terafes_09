@@ -48,9 +48,17 @@
             </div>
             <section class="encyclopedia-entry-detail" data-encyclopedia-detail="tamagoro" aria-labelledby="encyclopedia-tamagoro-title" hidden>
                 <button class="encyclopedia-back" type="button" data-encyclopedia-back>‹ 図鑑にもどる</button>
-                <div class="encyclopedia-entry-content">
-                    <img class="encyclopedia-entry-image pixel-art" src="${pageContext.request.contextPath}/images/pets/tamagoro/lv1.png" alt="たまごろうの卵">
-                    <div><p class="encyclopedia-entry-no">No.001 · たまごろう</p><h3 id="encyclopedia-tamagoro-title">たまごろう</h3><p class="encyclopedia-flavor">銀玉の音を聞きつけて現れた、好奇心旺盛な卵。殻の中身はまだ秘密。本人も知らないらしい。</p></div>
+                <div class="encyclopedia-entry-heading">
+                    <p class="encyclopedia-entry-no">No.001 · たまごろう</p><h3 id="encyclopedia-tamagoro-title">たまごろう</h3>
+                    <p class="encyclopedia-flavor">銀玉の音を聞きつけて現れた、好奇心旺盛なたまごろう。育つにつれて、その姿も変わっていく。</p>
+                </div>
+                <div class="encyclopedia-catalog-grid" aria-label="たまごろうの姿一覧">
+                    <% int[] tamagoroStages = model.Pet.getEvolutionLevels(); String[] tamagoroNotes = {"殻の中身はまだ秘密。本人も知らないらしい。", "殻にひびが入り、黒い靄がちらり。まだ本人は卵のつもり。", "殻が浮いて、靄がふわり。中身もそろそろ外が気になる。", "上の殻を卒業！黒い中身も、ようやく外の世界へ。"}; for (int stageIndex = 0; stageIndex < tamagoroStages.length; stageIndex++) { %>
+                    <article class="encyclopedia-catalog-card" style="grid-template-columns:80px minmax(0,1fr)">
+                        <img class="encyclopedia-catalog-image pixel-art" style="width:80px;height:80px" src="${pageContext.request.contextPath}/images/pets/tamagoro/lv<%= tamagoroStages[stageIndex] %>.png" alt="LV<%= tamagoroStages[stageIndex] %>のたまごろう">
+                        <div><h4>LV<%= tamagoroStages[stageIndex] %> · たまごろう</h4><p><%= stageIndex < tamagoroNotes.length ? tamagoroNotes[stageIndex] : "新しい姿に進化したたまごろう。冒険はまだまだ続く。" %></p></div>
+                    </article>
+                    <% } %>
                 </div>
             </section>
             <section class="encyclopedia-entry-detail" data-encyclopedia-detail="food" aria-labelledby="encyclopedia-food-title" hidden>
