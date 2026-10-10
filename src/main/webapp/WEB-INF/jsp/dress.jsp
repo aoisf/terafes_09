@@ -19,12 +19,11 @@
             <%
                 String[] outfitIds = {"normal", "happi", "sunglasses", "school-swimsuit"};
                 String[] outfitNames = {"ふつう", "パチンコ法被", "サングラス", "水着"};
-                String[] outfitImages = {"lv1.png", "lv1-happi.png", "lv1-sunglasses.png", "lv1-school-swimsuit.png"};
                 for (int i = 0; i < outfitIds.length; i++) {
                     boolean selected = outfitIds[i].equals(pet.getOutfitId());
             %>
             <article class="wardrobe-card <%= selected ? "is-selected" : "" %>">
-                <img class="wardrobe-image pet-image" src="${pageContext.request.contextPath}/images/pets/tamagoro/<%= outfitImages[i] %>" alt="<%= outfitNames[i] %>を着たたまごろう">
+                <img class="wardrobe-image pet-image" src="${pageContext.request.contextPath}/images/pets/tamagoro/<%= pet.getOutfitImageFor(outfitIds[i]) %>" alt="<%= outfitNames[i] %>を着たたまごろう">
                 <div class="wardrobe-copy"><h3 class="wardrobe-name"><%= outfitNames[i] %></h3></div>
                 <form method="post" action="${pageContext.request.contextPath}/dress">
                     <button class="dress-btn" type="submit" name="outfit" value="<%= outfitIds[i] %>" <%= selected ? "disabled aria-current=\"true\"" : "" %>><%= selected ? "着用中" : "これに着替える" %></button>

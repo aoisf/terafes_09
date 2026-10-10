@@ -23,7 +23,10 @@ public class Pet implements Serializable {
     public void setName(String name) { this.name = name; }
 
     public int getLevel() { return level; }
-    public void setLevel(int level) { this.level = level; }
+    public void setLevel(int level) {
+        if (this.level < 10 && level >= 10) this.outfitId = "normal";
+        this.level = level;
+    }
 
     public BigInteger getExp() { return exp; }
     public void setExp(BigInteger exp) { this.exp = exp; }
@@ -39,7 +42,11 @@ public class Pet implements Serializable {
         }
     }
     public String getOutfitImage() {
-        return "normal".equals(getOutfitId()) ? "lv1.png" : "lv1-" + getOutfitId() + ".png";
+        return getOutfitImageFor(getOutfitId());
+    }
+    public String getOutfitImageFor(String outfit) {
+        String stage = level >= 10 ? "lv10" : "lv1";
+        return "normal".equals(outfit) ? stage + ".png" : stage + "-" + outfit + ".png";
     }
     public String getOutfitName() {
         return switch (getOutfitId()) {

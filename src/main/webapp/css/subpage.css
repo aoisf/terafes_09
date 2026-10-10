@@ -233,3 +233,16 @@
         flex: 1 1 52px;
     }
 }
+
+/* レベル10の進化：短い揺れから姿を切り替える */
+.evolution-popup { width:min(420px,calc(100vw - 48px)); padding:24px; border:3px solid #d9aa43; border-radius:20px; background:#fff8e7; color:#32240e; text-align:center; box-shadow:0 12px 50px #0005; }
+.evolution-popup::backdrop { background:#151b2bb3; }
+.evolution-popup h2 { font-size:clamp(18px,5vw,24px); }
+.evolution-stage { position:relative; height:210px; }
+.evolution-stage img { position:absolute; inset:0; width:210px; height:210px; margin:auto; object-fit:contain; image-rendering:pixelated; }
+.evolution-before { animation:egg-evolve-before 1.2s ease-in-out forwards; }
+.evolution-after { animation:egg-evolve-after 1.5s ease-out forwards; }
+.evolution-popup button { border:0; border-radius:12px; padding:12px 28px; background:#f1b632; color:#32240e; font:inherit; font-weight:bold; cursor:pointer; }
+@keyframes egg-evolve-before { 0%,20% {opacity:1;transform:rotate(0)} 35%,65% {transform:rotate(-8deg)} 50%,80% {opacity:1;transform:rotate(8deg)} 100% {opacity:0;transform:scale(.9)} }
+@keyframes egg-evolve-after { 0%,75% {opacity:0;transform:scale(.8)} 90% {opacity:1;transform:scale(1.08)} 100% {opacity:1;transform:scale(1)} }
+@media (prefers-reduced-motion:reduce) { .evolution-before {display:none} .evolution-after {animation:none} }

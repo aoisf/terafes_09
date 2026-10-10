@@ -11,6 +11,41 @@ document.addEventListener('DOMContentLoaded', function() {
     var currentBalls = BigInt(page.getAttribute('data-balls'));
     var requestPending = false;
 
+    function showEvolution() {
+        var previousFocus = document.activeElement;
+        var dialog = document.createElement('dialog');
+        dialog.className = 'evolution-popup';
+        var title = document.createElement('h2');
+        title.id = 'evolution-title';
+        title.textContent = 'たまごろが進化したよ!';
+        dialog.setAttribute('aria-labelledby', title.id);
+        var stage = document.createElement('div');
+        stage.className = 'evolution-stage';
+        var before = document.createElement('img');
+        before.src = page.getAttribute('data-pet-images') + 'lv1.png';
+        before.alt = '進化前のたまごろ';
+        before.className = 'evolution-before';
+        var after = document.createElement('img');
+        after.src = page.getAttribute('data-pet-images') + 'lv10.png';
+        after.alt = 'レベル10で進化したたまごろ';
+        after.className = 'evolution-after';
+        stage.append(before, after);
+        var message = document.createElement('p');
+        message.textContent = '殻の中から黒い靄が…！ おきがえは「ふつう」に戻ったよ。';
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.textContent = 'やったね！';
+        close.addEventListener('click', function() { dialog.close(); });
+        dialog.addEventListener('close', function() {
+            dialog.remove();
+            if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+        });
+        dialog.append(title, stage, message, close);
+        document.body.appendChild(dialog);
+        dialog.showModal();
+        close.focus();
+    }
+
     function renderStatus(level, exp, nextExp) {
         ballsDisplay.textContent = currentBalls.toLocaleString() + ' 発';
         levelDisplay.textContent = 'LV: ' + level + ' (EXP: '
@@ -92,6 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     currentBalls = BigInt(data.balls);
                     renderStatus(data.level, data.exp, data.nextExp);
+                    if (data.evolved) showEvolution();
                 })
                 .catch(function(error) {
                     console.error('育成操作に失敗しました:', error);

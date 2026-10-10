@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ごはん - パチペット生活</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/food.css?v=1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=1">
 </head>
@@ -15,7 +15,7 @@
     <div class="app-container page-food care-page"
          data-endpoint="${pageContext.request.contextPath}/food"
          data-count-unit="個" data-balls="${pet.balls}" data-level="${pet.level}"
-         data-exp="${pet.exp}" data-next-exp="${pet.nextLevelExp}">
+         data-pet-images="${pageContext.request.contextPath}/images/pets/tamagoro/" data-exp="${pet.exp}" data-next-exp="${pet.nextLevelExp}">
         <h2 class="subpage-title">ごはんをあげる</h2>
         <div class="status-summary" id="care-status">
             <p>所持玉数: <strong id="balls-display" class="formatted-number">${pet.balls} 発</strong></p>
@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/care.js?v=1" defer></script>
+    <script src="${pageContext.request.contextPath}/js/care.js?v=2" defer></script>
     <script src="${pageContext.request.contextPath}/js/image-preview.js?v=1" defer></script>
 </body>
 </html>

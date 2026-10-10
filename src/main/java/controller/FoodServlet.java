@@ -66,6 +66,7 @@ public class FoodServlet extends HttpServlet {
         }
 
         boolean success = false;
+        boolean evolved;
         boolean invalidCount = false;
         String balls;
         int level;
@@ -84,7 +85,9 @@ public class FoodServlet extends HttpServlet {
             if (pet.getBalls().signum() > 0) {
                 session.removeAttribute("rescueClaimed");
             }
+            int previousLevel = pet.getLevel();
             if (!invalidCount) success = applyCare(pet, itemId, count);
+            evolved = success && previousLevel < 10 && pet.getLevel() >= 10;
             if (success) playRecord.recordCare(isFoodAction());
             balls = pet.getBalls().toString();
             level = pet.getLevel();
@@ -94,10 +97,10 @@ public class FoodServlet extends HttpServlet {
         }
 
         String json = String.format(
-            "{\"success\": %b, \"error\": \"%s\", \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\", \"record\": %s}",
+            "{\"success\": %b, \"error\": \"%s\", \"balls\": \"%s\", \"level\": %d, \"exp\": \"%s\", \"nextExp\": \"%s\", \"evolved\": %b, \"record\": %s}",
             success,
             invalidCount ? "invalid_count" : success ? "" : "insufficient_balls_or_invalid_item",
-            balls, level, exp, nextExp, recordJson
+            balls, level, exp, nextExp, evolved, recordJson
         );
         response.getWriter().write(json);
     }
