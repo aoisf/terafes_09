@@ -6,7 +6,7 @@ import java.math.BigInteger;
 public class Pet implements Serializable {
     private static final long serialVersionUID = 1L;
     // 実装済みの姿を昇順で管理。進化と図鑑はこの一覧を共有する。
-    private static final int[] EVOLUTION_LEVELS = {1, 10, 20, 30, 40};
+    private static final int[] EVOLUTION_LEVELS = {1, 10, 20, 30, 40, 50, 60};
 
     private String name;
     private int level;          // LV (1 - 100)

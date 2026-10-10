@@ -22,6 +22,15 @@
         <jsp:include page="/WEB-INF/jsp/parts/pachinko.jsp" />
         <jsp:include page="/WEB-INF/jsp/parts/control.jsp" />
         <jsp:include page="/WEB-INF/jsp/parts/command.jsp" />
+        <section aria-label="デバッグ用レベル変更" style="margin-top:16px;padding:14px;border:1px dashed #b79a58;border-radius:12px;background:#fff8e7;color:#32240e">
+            <strong>デバッグ用 · レベル変更</strong>
+            <p style="margin:6px 0 12px;font-size:12px">経験値を0、服を「ふつう」に戻して指定レベルに変更します。玉数はそのままです。未追加の進化形は最新の姿で表示します。</p>
+            <form method="post" action="${pageContext.request.contextPath}/main" style="display:flex;flex-wrap:wrap;gap:8px">
+                <% for (int debugLevel : new int[]{1,10,20,30,40,50,60,70,80,90,100}) { %>
+                <button type="submit" name="debugLevel" value="<%= debugLevel %>" style="padding:8px 12px;border:1px solid #b79a58;border-radius:8px;background:#fff;color:#32240e;font-weight:bold;cursor:pointer">level<%= debugLevel %></button>
+                <% } %>
+            </form>
+        </section>
     </div>
 
     <%-- 救済ポップアップ（部品化） --%>

@@ -48,6 +48,33 @@ public class MainServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        String debugLevel = request.getParameter("debugLevel");
+        if (debugLevel != null) {
+            int level;
+            try {
+                level = Integer.parseInt(debugLevel);
+            } catch (NumberFormatException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            if (level != 1 && (level < 10 || level > 100 || level % 10 != 0)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            HttpSession session = request.getSession();
+            Pet pet = (Pet) session.getAttribute("pet");
+            if (pet == null) {
+                pet = new Pet();
+                session.setAttribute("pet", pet);
+            }
+            synchronized (pet) {
+                pet.setLevel(level);
+                pet.setExp(java.math.BigInteger.ZERO);
+                pet.setOutfitId("normal");
+            }
+            response.sendRedirect(request.getContextPath() + "/main");
+            return;
+        }
         doGet(request, response);
     }
 }
