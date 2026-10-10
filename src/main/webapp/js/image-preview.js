@@ -1,5 +1,5 @@
 (function() {
-    var dialog = document.createElement('div');
+    var dialog = document.createElement('dialog');
     dialog.className = 'image-preview-dialog';
     dialog.hidden = true;
     dialog.setAttribute('role', 'dialog');
@@ -56,9 +56,10 @@
         previewImage.alt = label || '画像プレビュー';
         previewImage.classList.toggle('is-pixel-art', Boolean(pixelArt));
         dialog.hidden = false;
+        if (!dialog.open) dialog.showModal();
         dialog.setAttribute('aria-label', (label || '画像') + 'の拡大表示');
         document.body.classList.add('image-preview-open');
-        window.requestAnimationFrame(function() { dialog.classList.add('is-open'); });
+        dialog.classList.add('is-open');
         closeButton.focus();
     }
 
@@ -67,6 +68,7 @@
         dialog.classList.remove('is-open');
         document.body.classList.remove('image-preview-open');
         closeTimer = window.setTimeout(function() {
+            dialog.close();
             dialog.hidden = true;
             previewImage.removeAttribute('src');
             if (lastFocusedElement && document.contains(lastFocusedElement)) {
@@ -76,6 +78,10 @@
     }
 
     closeButton.addEventListener('click', closePreview);
+    dialog.addEventListener('cancel', function(event) {
+        event.preventDefault();
+        closePreview();
+    });
     dialog.addEventListener('click', function(event) {
         if (event.target === dialog) closePreview();
     });
@@ -96,7 +102,7 @@
     }, true);
 
     document.addEventListener('keydown', function(event) {
-        if (!dialog.classList.contains('is-open')) {
+        if (!dialog.open) {
             var targetImage = event.target.closest && event.target.closest('img.image-preview-trigger');
             if (targetImage && (event.key === 'Enter' || event.key === ' ')) {
                 event.preventDefault();

@@ -19,6 +19,7 @@ function rescueRequest(action, fields) {
     var contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
     var sentAt = performance.now();
     return fetch(contextPath + '/action', {
+        signal: AbortSignal.timeout(10000),
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
         body: params.toString()
@@ -395,13 +396,26 @@ function runWorkGame() {
     var round = 1;
     var totalRounds = 3;
 
+    function endWorkGame() {
+        if (activeInterval) window.clearInterval(activeInterval);
+        if (activeTimeout) window.clearTimeout(activeTimeout);
+        activeInterval = null;
+        activeTimeout = null;
+        gameTitle.textContent = '時間切れ！もう一度目押しに挑戦しよう。';
+        showRetryButton('目押しをやり直す', runWorkGame);
+    }
+
     function startRound() {
+        if (rescueSecondsLeft() <= 0) { endWorkGame(); return; }
         gameTitle.textContent = '3ラウンド連続で黄色ゾーンを狙おう！';
         gameCanvas.innerHTML = '';
         gameControls.innerHTML = '';
         var hud = document.createElement('div');
         hud.className = 'rescue-work-hud';
-        hud.textContent = 'ラウンド ' + round + ' / ' + totalRounds;
+        function updateTime() {
+            hud.textContent = 'ラウンド ' + round + ' / ' + totalRounds + ' · 残り ' + rescueSecondsLeft() + '秒';
+        }
+        updateTime();
         gameCanvas.appendChild(hud);
 
         var rail = document.createElement('div');
@@ -435,6 +449,8 @@ function runWorkGame() {
         var renderedElapsed = 0;
         stopButton.disabled = true;
         activeInterval = window.setInterval(function() {
+            updateTime();
+            if (rescueSecondsLeft() <= 0) { endWorkGame(); return; }
             renderedElapsed = Math.max(0, performance.now() - roundStart);
             stopButton.disabled = performance.now() < roundStart;
             var travel = renderedElapsed / 16 * speed % (maxPosition * 2);
@@ -501,19 +517,7 @@ function finishRescue(type) {
     if (rescueModal) rescueModal.setAttribute('aria-busy', 'true');
     rescueModal.querySelectorAll('button').forEach(function(button) { button.disabled = true; });
 
-    var contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
-    fetch(contextPath + '/action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json'
-        },
-        body: 'action=rescue&type=' + encodeURIComponent(type) + '&token=' + encodeURIComponent(rescueState ? rescueState.token : '')
-    })
-    .then(function(response) {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
-    })
+    rescueRequest('rescue', { type: type, token: rescueState ? rescueState.token : '' })
     .then(function(data) {
         updateBallDisplay(data.balls);
         checkZeroBalls(data.balls);
@@ -533,7 +537,7 @@ function finishRescue(type) {
     .catch(function(error) {
         console.error('救済処理に失敗しました:', error);
         cancelRescueGame(false);
-        setRescueStatus('通信に失敗しました。メニューから再度お試しください。');
+        setRescueStatus('通信に失敗しました。報酬を受け取っている場合もあるので、画面を更新して玉数を確認してね。');
         var firstButton = rescueMenu && rescueMenu.querySelector('button');
         if (firstButton) firstButton.focus();
     })

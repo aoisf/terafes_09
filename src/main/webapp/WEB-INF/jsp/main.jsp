@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/control.css?v=10">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=6">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css?v=9">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
 </head>
 <body>
     <!-- メイン画面コンテナ -->
@@ -61,9 +61,9 @@
     %>
 
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=8"></script>
-    <script src="${pageContext.request.contextPath}/js/rescue.js?v=9"></script>
-    <script src="${pageContext.request.contextPath}/js/dashboard.js?v=9" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=2" defer></script>
-<script src="${pageContext.request.contextPath}/js/final-evolution.js?v=1" data-context="${pageContext.request.contextPath}" defer></script>
+    <script src="${pageContext.request.contextPath}/js/rescue.js?v=10"></script>
+    <script src="${pageContext.request.contextPath}/js/dashboard.js?v=10" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=3" defer></script>
+<script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

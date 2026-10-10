@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=2">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/food.css?v=1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
 </head>
 <body>
     <div class="app-container page-food care-page"
@@ -58,8 +58,8 @@
         </div>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/care.js?v=12" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=1" defer></script>
-<script src="${pageContext.request.contextPath}/js/final-evolution.js?v=1" data-context="${pageContext.request.contextPath}" defer></script>
+    <script src="${pageContext.request.contextPath}/js/care.js?v=13" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=3" defer></script>
+<script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

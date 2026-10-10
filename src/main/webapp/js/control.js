@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         fetch(actionUrl, {
+            signal: AbortSignal.timeout(10000),
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

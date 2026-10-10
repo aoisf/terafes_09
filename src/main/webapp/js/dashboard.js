@@ -165,6 +165,7 @@
             var body = new URLSearchParams();
             body.set('background', button.getAttribute('data-background-choice'));
             fetch(dashboard.getAttribute('data-background-url'), {
+                signal: AbortSignal.timeout(10000),
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: body.toString()

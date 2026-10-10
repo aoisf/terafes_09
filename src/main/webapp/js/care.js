@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateAffordableCounts();
 
                 fetch(endpoint, {
+                    signal: AbortSignal.timeout(10000),
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params.toString()

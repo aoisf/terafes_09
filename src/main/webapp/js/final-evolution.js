@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.showFinalEvolutionChoice = function () {
         if (active) return;
         active = true;
-        fetch(endpoint).then(function (response) {
+        fetch(endpoint, { signal: AbortSignal.timeout(10000) }).then(function (response) {
             if (!response.ok) throw new Error('status');
             return response.json();
         }).then(function (data) {
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.addEventListener('click', function () {
                     buttons.forEach(function (b) { b.disabled = true; });
                     error.textContent = '';
-                    fetch(endpoint, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'form=' + form})
+                    fetch(endpoint, {signal:AbortSignal.timeout(10000), method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'form=' + form})
                     .then(function (response) {
                         if (!response.ok) throw new Error('choice');
                         return response.json();
