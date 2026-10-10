@@ -52,7 +52,7 @@
     %>
 
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=8"></script>
-    <script src="${pageContext.request.contextPath}/js/rescue.js?v=6"></script>
+    <script src="${pageContext.request.contextPath}/js/rescue.js?v=7"></script>
     <script src="${pageContext.request.contextPath}/js/dashboard.js?v=7" defer></script>
     <script src="${pageContext.request.contextPath}/js/image-preview.js?v=2" defer></script>
 </body>

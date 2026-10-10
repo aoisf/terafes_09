@@ -271,6 +271,7 @@ function runHelpGame() {
     }
 
     var currentIndex = 0;
+    var changingItem = false;
     function showItem() {
         var item = items[currentIndex];
         itemIcon.textContent = item.icon;
@@ -279,7 +280,7 @@ function runHelpGame() {
     }
     bins.addEventListener('click', function(event) {
         var button = event.target.closest('[data-category]');
-        if (!button || secondsLeft <= 0 || progress >= goal) return;
+        if (!button || changingItem || secondsLeft <= 0 || progress >= goal) return;
 
         if (button.getAttribute('data-category') === items[currentIndex].category) {
             progress++;
@@ -291,10 +292,13 @@ function runHelpGame() {
                 completeMiniGame('help', '全問分別成功！お手伝い完了！');
                 return;
             }
+            changingItem = true;
             currentIndex++;
             activeTimeout = window.setTimeout(function() {
                 activeTimeout = null;
+                if (secondsLeft <= 0) return;
                 showItem();
+                changingItem = false;
             }, 180);
         } else {
             mistakes++;
