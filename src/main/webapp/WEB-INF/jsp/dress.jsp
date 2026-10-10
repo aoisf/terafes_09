@@ -42,5 +42,6 @@
         </div>
     </div>
     <script src="${pageContext.request.contextPath}/js/image-preview.js?v=2" defer></script>
+<script src="${pageContext.request.contextPath}/js/final-evolution.js?v=1" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>
