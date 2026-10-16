@@ -13,8 +13,21 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/rescue.css?v=6">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dashboard.css?v=9">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sidebar-ads.css?v=3">
 </head>
 <body>
+    <aside class="side-ad side-ad-left" aria-label="クッションの広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=cushion" aria-label="卵を割らないゲルクッションの広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/cushion-ad-red.png" alt="その卵、割れません。衝撃分散ゲルクッション。座り心地を見てみる。" width="1024" height="3072">
+        </a>
+    </aside>
+    <aside class="side-ad side-ad-right" aria-label="卵の広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=egg" aria-label="朝採れ卵の広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/egg-ad.png" alt="たまごで、しあわせ。とっておきの、朝採れ卵。こだわりを見てみる。" width="1024" height="3072">
+        </a>
+    </aside>
     <!-- メイン画面コンテナ -->
     <div class="app-container">
         <jsp:include page="/WEB-INF/jsp/parts/dashboard.jsp" />
@@ -63,7 +76,7 @@
     <script src="${pageContext.request.contextPath}/js/pachinko.js?v=8"></script>
     <script src="${pageContext.request.contextPath}/js/rescue.js?v=10"></script>
     <script src="${pageContext.request.contextPath}/js/dashboard.js?v=10" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=5" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

@@ -88,7 +88,7 @@
 
     document.addEventListener('click', function(event) {
         if (event.target.closest && event.target.closest('.attract-screen')) return;
-        if (event.target.closest && event.target.closest('.background-option')) return;
+        if (event.target.closest && event.target.closest('.background-option, .side-ad')) return;
 
         var image = event.target.closest && event.target.closest('img:not(.image-preview-image)');
         if (image) {
@@ -124,7 +124,7 @@
     }, true);
 
     document.querySelectorAll('img:not(.image-preview-image)').forEach(function(image) {
-        if (!image.closest('.background-option')) prepareImage(image);
+        if (!image.closest('.background-option, .side-ad')) prepareImage(image);
     });
 })();
 

@@ -9,8 +9,21 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/dress.css?v=4">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sidebar-ads.css?v=3">
 </head>
 <body>
+    <aside class="side-ad side-ad-left" aria-label="新型ショッピングモールの広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=shopping-mall" aria-label="新型ショッピングモールの広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/shopping-mall-ad.png" alt="新型ショッピングモール。新しい街が、はじまる。" width="1000" height="2500">
+        </a>
+    </aside>
+    <aside class="side-ad side-ad-right" aria-label="古着店95％ONの広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=vintage-shop" aria-label="古着店全品95％ONの広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/vintage-shop-ad.png" alt="古着店、全品95％ON。お値段まさかの1.95倍。値下げじゃない、値上げです。" width="1000" height="2500">
+        </a>
+    </aside>
     <div class="app-container page-dress">
         <h2 class="subpage-title">クローゼット</h2>
         <p class="subpage-subtitle">${pet.name} のおきがえ</p>
@@ -41,7 +54,7 @@
             <a href="${pageContext.request.contextPath}/main" class="back-link">メイン画面へもどる</a>
         </div>
     </div>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=5" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

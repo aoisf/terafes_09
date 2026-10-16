@@ -10,8 +10,21 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/food.css?v=1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sidebar-ads.css?v=3">
 </head>
 <body>
+    <aside class="side-ad side-ad-left" aria-label="ボルシチの広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=borscht" aria-label="ごちそうボルシチの広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/borscht-ad.png" alt="しあわせ、煮込みました。ごちそうボルシチ。" width="1000" height="2500">
+        </a>
+    </aside>
+    <aside class="side-ad side-ad-right" aria-label="ジンギスカンの広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=jingisukan" aria-label="極みのジンギスカンの広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/jingisukan-ad.png" alt="焼ける香りに、もう夢中。極みのジンギスカン。" width="1000" height="2500">
+        </a>
+    </aside>
     <div class="app-container page-food care-page"
          data-endpoint="${pageContext.request.contextPath}/food"
          data-count-unit="個" data-balls="${pet.balls}" data-level="${pet.level}"
@@ -59,7 +72,7 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/js/care.js?v=13" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=5" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>

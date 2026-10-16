@@ -10,8 +10,21 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/subpage.css?v=3">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/play.css?v=1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/image-preview.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sidebar-ads.css?v=3">
 </head>
 <body>
+    <aside class="side-ad side-ad-left" aria-label="じゃんけん世界大会の広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=janken" aria-label="じゃんけん世界大会の広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/janken-ad.png" alt="その一手が、世界を変える。じゃんけん世界大会。" width="1000" height="2500">
+        </a>
+    </aside>
+    <aside class="side-ad side-ad-right" aria-label="新型パチンコ店開店の広告">
+        <span class="side-ad-label">ADVERTISEMENT</span>
+        <a href="${pageContext.request.contextPath}/advertisement.html?from=pachinko-opening" aria-label="新型パチンコ店開店の広告を見る">
+            <img src="${pageContext.request.contextPath}/images/ads/pachinko-opening-ad.png" alt="新型パチンコ店、堂々開店。" width="1000" height="2500">
+        </a>
+    </aside>
     <div class="app-container page-play care-page"
          data-endpoint="${pageContext.request.contextPath}/play"
          data-count-unit="回" data-balls="${pet.balls}" data-level="${pet.level}"
@@ -59,7 +72,7 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/js/care.js?v=13" defer></script>
-    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=4" defer></script>
+    <script src="${pageContext.request.contextPath}/js/image-preview.js?v=5" defer></script>
 <script src="${pageContext.request.contextPath}/js/final-evolution.js?v=2" data-context="${pageContext.request.contextPath}" defer></script>
 </body>
 </html>
